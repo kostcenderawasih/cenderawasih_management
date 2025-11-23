@@ -767,7 +767,17 @@
             };
             
             tenants.push(tenant);
-            localStorage.setItem('kostenants', JSON.stringify(tenants));
+            const API_URL = "PASTE_WEB_APP_URL_ANDA_HERE";
+
+async function sendToServer(action, payload) {
+    const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ action, ...payload }),
+        headers: { "Content-Type": "application/json" }
+    });
+    return res.json();
+}
+
             
             addActivity(`Penghuni baru ${tenant.name} ditambahkan ke kamar ${tenant.room}`);
             
@@ -1295,13 +1305,15 @@
             if (confirm('Apakah Anda yakin ingin menghapus penghuni ini? Semua tagihan terkait juga akan dihapus.')) {
                 const tenant = tenants.find(t => t.id === id);
                 tenants = tenants.filter(t => t.id !== id);
-                localStorage.setItem('kostenants', JSON.stringify(tenants));
+                sendToServer("saveTenant", { tenant });
+
                 
                 // Also delete related bills
                 bills = bills.filter(b => b.tenantId !== id);
-                localStorage.setItem('kosbills', JSON.stringify(bills));
+                sendToServer("saveBill", { bill });
                 
                 addActivity(`Penghuni ${tenant.name} dihapus dari sistem`);
+				sendToServer("saveActivity", { activity });
                 
                 showNotification('Penghuni berhasil dihapus!', 'success');
                 updateDashboard();
