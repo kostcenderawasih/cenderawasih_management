@@ -605,265 +605,256 @@
     </div>
 
     <script>
-        // Data storage
-        let tenants = JSON.parse(localStorage.getItem('kostenants') || '[]');
-        let bills = JSON.parse(localStorage.getItem('kosbills') || '[]');
-        let activities = JSON.parse(localStorage.getItem('kosactivities') || '[]');
+        <!-- simpan sebagai cenderawasih_management_integrated.html -->
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cenderawasih Kost Management (Integrated)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* (Sisipkan CSS Anda sama persis seperti file asli; omitted here for brevity) */
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-full">
+  <!-- (Seluruh HTML UI Anda yang lama tetap utuh, hanya script JS di bagian bawah yang saya modifikasi) -->
+  <!-- ... (sebelumnya content tetap dipertahankan) ... -->
 
-        // DOM elements
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const tenantModal = document.getElementById('tenantModal');
-        const billModal = document.getElementById('billModal');
-        const ktpModal = document.getElementById('ktpModal');
-        const notification = document.getElementById('notification');
+  <!-- TEMPATKAN seluruh HTML body Anda di sini, kemudian di bagian akhir ganti script dengan yang di bawah -->
+  <script>
+  // ====== CONFIG ======
+  const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwWlPLcE-00CYgrF338QCHSnDW2oxZaYDUbljiNZZsF2KSraBD5Zaxdq0v3AGX37dEFJA/exec";
 
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', function() {
-            updateDashboard();
-            renderTenants();
-            renderBills();
-            renderReminders();
-            renderReports();
-            updateBillTenantSelect();
-            loadLogo();
-            
-            // Set default due date to next month
-            const nextMonth = new Date();
-            nextMonth.setMonth(nextMonth.getMonth() + 1);
-            document.getElementById('dueDate').value = nextMonth.toISOString().split('T')[0];
+  // ====== local data holders (keperluan UI) ======
+  let tenants = [];
+  let bills = [];
+  let activities = [];
 
-            // Initialize search functionality
-            document.getElementById('searchTenants').addEventListener('input', filterTenants);
-            document.getElementById('billFilter').addEventListener('change', filterBills);
-            
-            // Initialize logo upload functionality
-            document.getElementById('logoUpload').addEventListener('change', handleLogoUpload);
-            document.getElementById('removeLogo').addEventListener('click', removeLogo);
-        });
+  // ====== helper: fetch JSON wrapper ======
+  async function apiGet(action) {
+    try {
+      const url = `${WEBAPP_URL}?action=${encodeURIComponent(action)}`;
+      const res = await fetch(url);
+      const j = await res.json();
+      return j;
+    } catch (err) {
+      console.error("API GET error:", err);
+      return [];
+    }
+  }
 
-        // Tab switching
-        tabBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const tabName = btn.dataset.tab;
-                
-                // Update active tab button
-                tabBtns.forEach(b => {
-                    b.classList.remove('active', 'border-indigo-500', 'text-indigo-600');
-                    b.classList.add('border-transparent', 'text-gray-500');
-                });
-                btn.classList.add('active', 'border-indigo-500', 'text-indigo-600');
-                btn.classList.remove('border-transparent', 'text-gray-500');
-                
-                // Show active tab content
-                tabContents.forEach(content => {
-                    content.classList.add('hidden');
-                });
-                document.getElementById(tabName + '-tab').classList.remove('hidden');
-                document.getElementById(tabName + '-tab').classList.add('fade-in');
+  async function apiPost(action, payload) {
+    try {
+      const url = `${WEBAPP_URL}?action=${encodeURIComponent(action)}`;
+      const res = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+      return await res.json();
+    } catch (err) {
+      console.error("API POST error:", err);
+      return { error: err.message };
+    }
+  }
 
-                // Update reports when reports tab is clicked
-                if (tabName === 'reports') {
-                    renderReports();
-                }
-            });
-        });
+  // ====== Initialization ======
+  document.addEventListener("DOMContentLoaded", async () => {
+    // fetch initial data from Google Sheet via WebApp
+    tenants = await apiGet("getTenants") || [];
+    bills = await apiGet("getBills") || [];
+    activities = await apiGet("getActivities") || [];
 
-        // Modal handlers
-        document.getElementById('addTenantBtn').addEventListener('click', () => showModal(tenantModal));
-        document.getElementById('addTenantBtn2').addEventListener('click', () => showModal(tenantModal));
-        document.getElementById('quickAddTenant').addEventListener('click', () => showModal(tenantModal));
-        document.getElementById('addBillBtn').addEventListener('click', () => showModal(billModal));
-        document.getElementById('quickAddBill').addEventListener('click', () => showModal(billModal));
-        document.getElementById('closeTenantModal').addEventListener('click', () => hideModal(tenantModal));
-        document.getElementById('closeBillModal').addEventListener('click', () => hideModal(billModal));
-        document.getElementById('closeKtpModal').addEventListener('click', () => hideModal(ktpModal));
-        document.getElementById('cancelTenant').addEventListener('click', () => hideModal(tenantModal));
-        document.getElementById('cancelBill').addEventListener('click', () => hideModal(billModal));
+    // RENDER UI (panggil fungsi render yang sudah ada di HTML Anda)
+    updateDashboard();
+    renderTenants();
+    renderBills();
+    renderReminders();
+    renderReports();
+    updateBillTenantSelect();
+    renderActivities();
 
-        // Quick actions
-        document.getElementById('exportData').addEventListener('click', exportData);
-        document.getElementById('sendReminders').addEventListener('click', sendReminders);
+    // set default due date next month (sama seperti sebelumnya)
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    const dueDateInput = document.getElementById('dueDate');
+    if (dueDateInput) dueDateInput.value = nextMonth.toISOString().split('T')[0];
 
-        // Form handlers
-        document.getElementById('tenantForm').addEventListener('submit', handleTenantSubmit);
-        document.getElementById('billForm').addEventListener('submit', handleBillSubmit);
+    // attach other UI handlers (logo upload, search, etc.) - keep your existing handlers
+    document.getElementById('searchTenants')?.addEventListener('input', filterTenants);
+    document.getElementById('billFilter')?.addEventListener('change', filterBills);
 
-        function showModal(modal) {
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            document.body.style.overflow = 'hidden';
-        }
+    // attach forms
+    document.getElementById('tenantForm')?.addEventListener('submit', handleTenantSubmit);
+    document.getElementById('billForm')?.addEventListener('submit', handleBillSubmit);
+  });
 
-        function hideModal(modal) {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            document.body.style.overflow = 'auto';
-        }
+  // ====== CRUD operations connecting to API ======
 
-        function showNotification(message, type = 'success') {
-            const notificationEl = document.getElementById('notification');
-            const textEl = document.getElementById('notificationText');
-            
-            textEl.textContent = message;
-            
-            // Update notification style based on type
-            const baseClasses = 'fixed top-4 right-4 px-6 py-4 rounded-xl shadow-2xl notification z-50 max-w-sm text-white font-medium';
-            const typeClasses = {
-                success: 'bg-emerald-500',
-                error: 'bg-red-500',
-                warning: 'bg-amber-500',
-                info: 'bg-blue-500'
-            };
-            
-            notificationEl.className = `${baseClasses} ${typeClasses[type] || typeClasses.success}`;
-            notificationEl.classList.remove('hidden');
-            
-            setTimeout(() => {
-                notificationEl.classList.add('hidden');
-            }, 4000);
-        }
+  async function saveTenantToServer(tenantObj) {
+    const res = await apiPost("addTenant", tenantObj);
+    return res;
+  }
 
-        function handleTenantSubmit(e) {
-            e.preventDefault();
-            
-            const ktpFile = document.getElementById('ktpFile').files[0];
-            let ktpData = null;
-            
-            // Validate file size (5MB max)
-            if (ktpFile && ktpFile.size > 5 * 1024 * 1024) {
-                showNotification('Ukuran file KTP terlalu besar. Maksimal 5MB.', 'error');
-                return;
-            }
-            
-            // Convert file to base64 for storage
-            if (ktpFile) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    ktpData = {
-                        name: ktpFile.name,
-                        type: ktpFile.type,
-                        size: ktpFile.size,
-                        data: e.target.result
-                    };
-                    
-                    saveTenant(ktpData);
-                };
-                reader.readAsDataURL(ktpFile);
-            } else {
-                saveTenant(null);
-            }
-        }
-        
-        function saveTenant(ktpData) {
-            const tenant = {
-                id: Date.now(),
-                name: document.getElementById('tenantName').value,
-                room: document.getElementById('roomNumber').value,
-                phone: document.getElementById('phoneNumber').value,
-                monthlyRate: parseInt(document.getElementById('monthlyRate').value),
-                joinDate: new Date().toISOString().split('T')[0],
-                ktpFile: ktpData
-            };
-            
-            tenants.push(tenant);
-            localStorage.setItem('kostenants', JSON.stringify(tenants));
-            
-            addActivity(`Penghuni baru ${tenant.name} ditambahkan ke kamar ${tenant.room}`);
-            
-            document.getElementById('tenantForm').reset();
-            hideModal(tenantModal);
-            showNotification('Penghuni berhasil ditambahkan!', 'success');
-            
-            updateDashboard();
-            renderTenants();
-            renderReports();
-            updateBillTenantSelect();
-        }
+  async function saveBillToServer(billObj) {
+    const res = await apiPost("addBill", billObj);
+    return res;
+  }
 
-        function handleBillSubmit(e) {
-            e.preventDefault();
-            
-            const tenantId = parseInt(document.getElementById('billTenant').value);
-            const tenant = tenants.find(t => t.id === tenantId);
-            
-            const bill = {
-                id: Date.now(),
-                tenantId: tenantId,
-                tenantName: tenant.name,
-                room: tenant.room,
-                amount: parseInt(document.getElementById('billAmount').value),
-                dueDate: document.getElementById('dueDate').value,
-                description: document.getElementById('billDescription').value || `Tagihan kos bulan ${new Date().toLocaleDateString('id-ID', {month: 'long', year: 'numeric'})}`,
-                status: 'pending',
-                createdDate: new Date().toISOString().split('T')[0]
-            };
-            
-            bills.push(bill);
-            localStorage.setItem('kosbills', JSON.stringify(bills));
-            
-            addActivity(`Tagihan sebesar Rp ${bill.amount.toLocaleString('id-ID')} dibuat untuk ${tenant.name}`);
-            
-            document.getElementById('billForm').reset();
-            hideModal(billModal);
-            showNotification('Tagihan berhasil dibuat!', 'success');
-            
-            updateDashboard();
-            renderBills();
-            renderReminders();
-            renderReports();
-        }
+  async function markBillPaidOnServer(id) {
+    const payload = { id: id, paidDate: new Date().toISOString().split('T')[0] };
+    const res = await apiPost("updateBill", payload);
+    return res;
+  }
 
-        function addActivity(message) {
-            activities.unshift({
-                id: Date.now(),
-                message: message,
-                date: new Date().toISOString()
-            });
-            
-            // Keep only last 20 activities
-            if (activities.length > 20) {
-                activities = activities.slice(0, 20);
-            }
-            
-            localStorage.setItem('kosactivities', JSON.stringify(activities));
-            renderActivities();
-        }
+  async function deleteTenantOnServer(id) {
+    const res = await apiPost("deleteTenant", { id: id });
+    return res;
+  }
 
-        function updateDashboard() {
-            document.getElementById('totalTenants').textContent = tenants.length;
-            document.getElementById('activeBills').textContent = bills.filter(b => b.status === 'pending').length;
-            
-            const today = new Date().toISOString().split('T')[0];
-            const dueBills = bills.filter(b => b.status === 'pending' && b.dueDate <= today).length;
-            const overdueBills = bills.filter(b => b.status === 'pending' && b.dueDate < today).length;
-            
-            document.getElementById('dueBills').textContent = dueBills;
-            document.getElementById('overdueBills').textContent = overdueBills;
-            
-            // Calculate total revenue
-            const currentMonth = new Date().toISOString().slice(0, 7);
-            const monthlyRevenue = bills
-                .filter(b => b.status === 'paid' && b.paidDate && b.paidDate.startsWith(currentMonth))
-                .reduce((sum, bill) => sum + bill.amount, 0);
-            
-            document.getElementById('totalRevenue').textContent = `Rp ${monthlyRevenue.toLocaleString('id-ID')}`;
-            
-            renderActivities();
-        }
+  // ====== Integrate with existing UI functions ======
+  // Replace previous saveTenant/handleTenantSubmit to call server
+  async function handleTenantSubmit(e) {
+    e.preventDefault();
 
-        function renderActivities() {
-            const container = document.getElementById('recentActivities');
-            
-            if (activities.length === 0) {
-                container.innerHTML = `
-                    <div class="text-gray-500 text-center py-8">
-                        <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                        </svg>
-                        <p class="font-medium">Belum ada aktivitas</p>
-                        <p class="text-sm">Aktivitas akan muncul di sini</p>
-                    </div>
+    const ktpFile = document.getElementById('ktpFile').files[0];
+    if (ktpFile && ktpFile.size > 5 * 1024 * 1024) {
+      showNotification('Ukuran file KTP terlalu besar. Maksimal 5MB.', 'error');
+      return;
+    }
+
+    let ktpData = "";
+    if (ktpFile) {
+      ktpData = await fileToBase64(ktpFile);
+    }
+
+    const tenant = {
+      id: Date.now(),
+      name: document.getElementById('tenantName').value,
+      room: document.getElementById('roomNumber').value,
+      phone: document.getElementById('phoneNumber').value,
+      monthlyRate: Number(document.getElementById('monthlyRate').value),
+      joinDate: new Date().toISOString().split('T')[0],
+      ktpFile: ktpData
+    };
+
+    // post to server
+    const resp = await saveTenantToServer(tenant);
+    if (resp && resp.success) {
+      tenants.push(tenant);
+      addActivityClient(`Penghuni baru ${tenant.name} ditambahkan ke kamar ${tenant.room}`);
+      document.getElementById('tenantForm').reset();
+      hideModal(document.getElementById('tenantModal'));
+      showNotification('Penghuni berhasil ditambahkan!', 'success');
+      updateDashboard();
+      renderTenants();
+      updateBillTenantSelect();
+      renderReports();
+    } else {
+      showNotification('Gagal menambahkan penghuni: ' + (resp.error || JSON.stringify(resp)), 'error');
+    }
+  }
+
+  async function handleBillSubmit(e) {
+    e.preventDefault();
+
+    const tenantId = parseInt(document.getElementById('billTenant').value);
+    const tenant = tenants.find(t => Number(t.id) === tenantId);
+    if (!tenant) {
+      showNotification('Pilih penghuni valid untuk membuat tagihan', 'error');
+      return;
+    }
+
+    const bill = {
+      id: Date.now(),
+      tenantId: tenantId,
+      tenantName: tenant.name,
+      room: tenant.room,
+      amount: Number(document.getElementById('billAmount').value),
+      dueDate: document.getElementById('dueDate').value,
+      description: document.getElementById('billDescription').value || `Tagihan kos bulan ${new Date().toLocaleDateString('id-ID', {month: 'long', year: 'numeric'})}`,
+      status: 'pending',
+      createdDate: new Date().toISOString().split('T')[0]
+    };
+
+    const resp = await saveBillToServer(bill);
+    if (resp && resp.success) {
+      bills.push(bill);
+      addActivityClient(`Tagihan sebesar Rp ${bill.amount.toLocaleString('id-ID')} dibuat untuk ${tenant.name}`);
+      document.getElementById('billForm').reset();
+      hideModal(document.getElementById('billModal'));
+      showNotification('Tagihan berhasil dibuat!', 'success');
+      updateDashboard();
+      renderBills();
+      renderReminders();
+      renderReports();
+    } else {
+      showNotification('Gagal membuat tagihan: ' + (resp.error || JSON.stringify(resp)), 'error');
+    }
+  }
+
+  // mark as paid — will call server
+  async function markAsPaid(billId) {
+    const ok = confirm("Tandai tagihan sebagai Lunas?");
+    if (!ok) return;
+    const resp = await markBillPaidOnServer(billId);
+    if (resp && resp.success) {
+      const b = bills.find(x => String(x.id) === String(billId));
+      if (b) { b.status = "paid"; b.paidDate = new Date().toISOString().split('T')[0]; }
+      addActivityClient(`Tagihan ${billId} ditandai lunas`);
+      showNotification('Tagihan ditandai lunas', 'success');
+      updateDashboard();
+      renderBills();
+      renderReports();
+    } else {
+      showNotification('Gagal menandai lunas: ' + (resp.error || JSON.stringify(resp)), 'error');
+    }
+  }
+
+  // delete tenant — call server
+  async function deleteTenant(id) {
+    const ok = confirm("Yakin ingin menghapus penghuni ini?");
+    if (!ok) return;
+    const resp = await deleteTenantOnServer(id);
+    if (resp && resp.success) {
+      tenants = tenants.filter(t => String(t.id) !== String(id));
+      addActivityClient(`Penghuni dengan ID ${id} dihapus`);
+      showNotification('Penghuni dihapus', 'success');
+      updateDashboard();
+      renderTenants();
+    } else {
+      showNotification('Gagal menghapus penghuni: ' + (resp.error || JSON.stringify(resp)), 'error');
+    }
+  }
+
+  // small client-side activity management (keperluan render)
+  function addActivityClient(message) {
+    activities.unshift({ id: Date.now(), message: message, date: new Date().toISOString() });
+    if (activities.length > 50) activities = activities.slice(0,50);
+    renderActivities();
+  }
+
+  // helper convert file->base64
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = e => reject(e);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // =====================================================================================
+  // NOTE:
+  // The rest of UI functions (updateDashboard, renderTenants, renderBills, renderActivities,
+  // renderReports, updateBillTenantSelect, filterTenants, filterBills, showModal, hideModal,
+  // showNotification, viewKTP, downloadKtp, printInvoice, etc.) should be kept
+  // as in your original HTML file. Only the storage operations were replaced to use the WebApp.
+  // =====================================================================================
+  </script>
+</body>
+</html>
+
                 `;
                 return;
             }
@@ -2067,157 +2058,7 @@
                             <div class="papua-ornament"></div>
                         </div>
                     </div>
-                
-<!-- GOOGLE APPS SCRIPT INTEGRATION: appended overrides -->
-<script>
-/* === CONFIG: ganti dengan Web App URL Anda === */
-const API_URL = "PASTE_WEB_APP_URL_HERE";
-
-/* Kirim data ke Google Apps Script (Web App) */
-async function sendToServer(action, payload) {
-    if (!API_URL || API_URL.includes("PASTE_WEB_APP_URL_HERE")) {
-        console.warn("API_URL belum diatur. Ganti konstanta API_URL dengan Web App URL Anda.");
-        return { status: "error", message: "API_URL not set" };
-    }
-    try {
-        const res = await fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify(Object.assign({ action: action }, payload || {})),
-            headers: { "Content-Type": "application/json" }
-        });
-        return await res.json();
-    } catch (err) {
-        console.error("Gagal mengirim data ke server:", err);
-        return { status: "error", message: err.toString() };
-    }
-}
-
-/* Override lokal saveTenant untuk juga menyimpan ke Google Sheets */
-async function saveTenant(ktpData) {
-    // build tenant object matching existing structure
-    const tenant = {
-        id: Date.now(),
-        name: document.getElementById('tenantName').value,
-        room: document.getElementById('roomNumber').value,
-        phone: document.getElementById('phoneNumber').value,
-        monthlyRate: parseInt(document.getElementById('monthlyRate').value) || 0,
-        joinDate: new Date().toISOString().split('T')[0],
-        // Save only base64 or filename to sheets (sheets cell length limited) — we store data URL if small
-        ktpFile: ktpData ? (ktpData.data || "") : ""
-    };
-
-    // push to local state (existing arrays)
-    try {
-        if (typeof tenants !== 'undefined' && Array.isArray(tenants)) {
-            tenants.push(tenant);
-            localStorage.setItem('kostenants', JSON.stringify(tenants));
-        }
-    } catch (e) { console.warn("Local saveTenant update failed:", e); }
-
-    // Send to Google Sheets (Apps Script)
-    const resp = await sendToServer("saveTenant", { tenant: tenant });
-    if (resp && resp.status === "success") {
-        showNotification('Penghuni tersimpan di Google Sheets!', 'success');
-    } else {
-        showNotification('Gagal menyimpan ke server. Data disimpan lokal.', 'warning');
-    }
-
-    addActivity(`Penghuni baru ${tenant.name} ditambahkan ke kamar ${tenant.room}`);
-    try { document.getElementById('tenantForm').reset(); } catch(e){}
-    try { hideModal(tenantModal); } catch(e){}
-    updateDashboard();
-    renderTenants();
-    renderReports();
-    updateBillTenantSelect();
-}
-
-/* Override existing handleBillSubmit to save bill to server */
-async function handleBillSubmit(e) {
-    if (e && e.preventDefault) e.preventDefault();
-
-    const tenantId = parseInt(document.getElementById('billTenant').value);
-    const tenant = (typeof tenants !== 'undefined') ? tenants.find(t => t.id === tenantId) : null;
-
-    const bill = {
-        id: Date.now(),
-        tenantId: tenantId || null,
-        tenantName: tenant ? tenant.name : (document.getElementById('billTenant').selectedOptions[0]?.text || ""),
-        room: tenant ? tenant.room : "",
-        amount: parseInt(document.getElementById('billAmount').value) || 0,
-        dueDate: document.getElementById('dueDate').value,
-        description: document.getElementById('billDescription').value || '',
-        status: 'pending',
-        createdDate: new Date().toISOString().split('T')[0]
-    };
-
-    // save local
-    try {
-        if (typeof bills !== 'undefined' && Array.isArray(bills)) {
-            bills.push(bill);
-            localStorage.setItem('kosbills', JSON.stringify(bills));
-        }
-    } catch (e) { console.warn("Local saveBill failed:", e); }
-
-    // send to server
-    const resp = await sendToServer("saveBill", { bill: bill });
-    if (resp && resp.status === "success") {
-        showNotification('Tagihan tersimpan di Google Sheets!', 'success');
-    } else {
-        showNotification('Gagal menyimpan tagihan ke server. Data disimpan lokal.', 'warning');
-    }
-
-    addActivity(`Tagihan Rp ${bill.amount.toLocaleString('id-ID')} dibuat untuk ${bill.tenantName}`);
-    try { document.getElementById('billForm').reset(); } catch(e){}
-    try { hideModal(billModal); } catch(e){}
-    updateDashboard();
-    renderBills();
-    renderReminders();
-    renderReports();
-}
-
-/* Override addActivity to also store in server */
-function addActivity(message) {
-    const activity = {
-        id: Date.now(),
-        message: message,
-        date: new Date().toISOString()
-    };
-
-    // local
-    try {
-        if (typeof activities !== 'undefined' && Array.isArray(activities)) {
-            activities.unshift(activity);
-            if (activities.length > 50) activities = activities.slice(0, 50);
-            localStorage.setItem('kosactivities', JSON.stringify(activities));
-            renderActivities();
-        }
-    } catch (e) { console.warn("Local addActivity failed:", e); }
-
-    // remote (fire-and-forget)
-    sendToServer("saveActivity", { activity: activity }).then(resp => {
-        if (!(resp && resp.status === "success")) {
-            console.warn("Activity not saved remotely:", resp);
-        }
-    }).catch(err => {
-        console.warn("Failed to send activity to server:", err);
-    });
-}
-
-/* Helper: expose function to set API_URL at runtime via prompt (optional) */
-function configureApiUrl() {
-    const url = prompt("Masukkan Web App URL Google Apps Script (Web app - Deploy) :", API_URL || "");
-    if (url) {
-        // naive replacement in memory; persist to localStorage for convenience
-        localStorage.setItem('kost_api_url', url);
-        // Also set global variable (won't persist across reload unless user updates file)
-        window.API_URL = url;
-        alert("API URL disimpan di localStorage (key: kost_api_url). Jangan lupa update konstanta API_URL di file HTML agar permanen.");
-    }
-}
-</script>
-<!-- END integration script -->
-
-</body>
+                </body>
                 </html>
             `;
 
@@ -2236,155 +2077,5 @@ function configureApiUrl() {
             };
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98d2e5a446255fd8',t:'MTc2MDIzMzMwOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-<!-- GOOGLE APPS SCRIPT INTEGRATION: appended overrides -->
-<script>
-/* === CONFIG: ganti dengan Web App URL Anda === */
-const API_URL = "PASTE_WEB_APP_URL_HERE";
-
-/* Kirim data ke Google Apps Script (Web App) */
-async function sendToServer(action, payload) {
-    if (!API_URL || API_URL.includes("PASTE_WEB_APP_URL_HERE")) {
-        console.warn("API_URL belum diatur. Ganti konstanta API_URL dengan Web App URL Anda.");
-        return { status: "error", message: "API_URL not set" };
-    }
-    try {
-        const res = await fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify(Object.assign({ action: action }, payload || {})),
-            headers: { "Content-Type": "application/json" }
-        });
-        return await res.json();
-    } catch (err) {
-        console.error("Gagal mengirim data ke server:", err);
-        return { status: "error", message: err.toString() };
-    }
-}
-
-/* Override lokal saveTenant untuk juga menyimpan ke Google Sheets */
-async function saveTenant(ktpData) {
-    // build tenant object matching existing structure
-    const tenant = {
-        id: Date.now(),
-        name: document.getElementById('tenantName').value,
-        room: document.getElementById('roomNumber').value,
-        phone: document.getElementById('phoneNumber').value,
-        monthlyRate: parseInt(document.getElementById('monthlyRate').value) || 0,
-        joinDate: new Date().toISOString().split('T')[0],
-        // Save only base64 or filename to sheets (sheets cell length limited) — we store data URL if small
-        ktpFile: ktpData ? (ktpData.data || "") : ""
-    };
-
-    // push to local state (existing arrays)
-    try {
-        if (typeof tenants !== 'undefined' && Array.isArray(tenants)) {
-            tenants.push(tenant);
-            localStorage.setItem('kostenants', JSON.stringify(tenants));
-        }
-    } catch (e) { console.warn("Local saveTenant update failed:", e); }
-
-    // Send to Google Sheets (Apps Script)
-    const resp = await sendToServer("saveTenant", { tenant: tenant });
-    if (resp && resp.status === "success") {
-        showNotification('Penghuni tersimpan di Google Sheets!', 'success');
-    } else {
-        showNotification('Gagal menyimpan ke server. Data disimpan lokal.', 'warning');
-    }
-
-    addActivity(`Penghuni baru ${tenant.name} ditambahkan ke kamar ${tenant.room}`);
-    try { document.getElementById('tenantForm').reset(); } catch(e){}
-    try { hideModal(tenantModal); } catch(e){}
-    updateDashboard();
-    renderTenants();
-    renderReports();
-    updateBillTenantSelect();
-}
-
-/* Override existing handleBillSubmit to save bill to server */
-async function handleBillSubmit(e) {
-    if (e && e.preventDefault) e.preventDefault();
-
-    const tenantId = parseInt(document.getElementById('billTenant').value);
-    const tenant = (typeof tenants !== 'undefined') ? tenants.find(t => t.id === tenantId) : null;
-
-    const bill = {
-        id: Date.now(),
-        tenantId: tenantId || null,
-        tenantName: tenant ? tenant.name : (document.getElementById('billTenant').selectedOptions[0]?.text || ""),
-        room: tenant ? tenant.room : "",
-        amount: parseInt(document.getElementById('billAmount').value) || 0,
-        dueDate: document.getElementById('dueDate').value,
-        description: document.getElementById('billDescription').value || '',
-        status: 'pending',
-        createdDate: new Date().toISOString().split('T')[0]
-    };
-
-    // save local
-    try {
-        if (typeof bills !== 'undefined' && Array.isArray(bills)) {
-            bills.push(bill);
-            localStorage.setItem('kosbills', JSON.stringify(bills));
-        }
-    } catch (e) { console.warn("Local saveBill failed:", e); }
-
-    // send to server
-    const resp = await sendToServer("saveBill", { bill: bill });
-    if (resp && resp.status === "success") {
-        showNotification('Tagihan tersimpan di Google Sheets!', 'success');
-    } else {
-        showNotification('Gagal menyimpan tagihan ke server. Data disimpan lokal.', 'warning');
-    }
-
-    addActivity(`Tagihan Rp ${bill.amount.toLocaleString('id-ID')} dibuat untuk ${bill.tenantName}`);
-    try { document.getElementById('billForm').reset(); } catch(e){}
-    try { hideModal(billModal); } catch(e){}
-    updateDashboard();
-    renderBills();
-    renderReminders();
-    renderReports();
-}
-
-/* Override addActivity to also store in server */
-function addActivity(message) {
-    const activity = {
-        id: Date.now(),
-        message: message,
-        date: new Date().toISOString()
-    };
-
-    // local
-    try {
-        if (typeof activities !== 'undefined' && Array.isArray(activities)) {
-            activities.unshift(activity);
-            if (activities.length > 50) activities = activities.slice(0, 50);
-            localStorage.setItem('kosactivities', JSON.stringify(activities));
-            renderActivities();
-        }
-    } catch (e) { console.warn("Local addActivity failed:", e); }
-
-    // remote (fire-and-forget)
-    sendToServer("saveActivity", { activity: activity }).then(resp => {
-        if (!(resp && resp.status === "success")) {
-            console.warn("Activity not saved remotely:", resp);
-        }
-    }).catch(err => {
-        console.warn("Failed to send activity to server:", err);
-    });
-}
-
-/* Helper: expose function to set API_URL at runtime via prompt (optional) */
-function configureApiUrl() {
-    const url = prompt("Masukkan Web App URL Google Apps Script (Web app - Deploy) :", API_URL || "");
-    if (url) {
-        // naive replacement in memory; persist to localStorage for convenience
-        localStorage.setItem('kost_api_url', url);
-        // Also set global variable (won't persist across reload unless user updates file)
-        window.API_URL = url;
-        alert("API URL disimpan di localStorage (key: kost_api_url). Jangan lupa update konstanta API_URL di file HTML agar permanen.");
-    }
-}
-</script>
-<!-- END integration script -->
-
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98d2e5a446255fd8',t:'MTc2MDIzMzMwOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
