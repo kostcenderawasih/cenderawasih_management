@@ -606,9 +606,9 @@
 
     <script>
         // Data storage
-        let tenants = JSON.parse(localStorage.getItem('kostenants') || '[]');
-        let bills = JSON.parse(localStorage.getItem('kosbills') || '[]');
-        let activities = JSON.parse(localStorage.getItem('kosactivities') || '[]');
+let tenants = [];
+let bills = [];
+let activities = [];
 
         // DOM elements
         const tabBtns = document.querySelectorAll('.tab-btn');
@@ -618,7 +618,30 @@
         const ktpModal = document.getElementById('ktpModal');
         const notification = document.getElementById('notification');
 
-        // Initialize app
+
+        // Google Sheets POST helper (uses your deployed Web App)
+        async function saveToSheet(sheet, rowArray) {
+            const url = "https://script.google.com/macros/s/AKfycbyJp4A2R4jeVsjkaUuWyDE3eotx8HiHCigXNmFhzHEleYA1MLRV-qFzLNy4JV6EBDgArQ/exec";
+            try {
+                const res = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        sheet: sheet,
+                        row: rowArray
+                    })
+                });
+                // Try parse response (Apps Script may return text)
+                try { return await res.json(); } catch (e) { return {ok: true}; }
+            } catch (err) {
+                console.error('saveToSheet error', err);
+                showNotification('Gagal menyimpan ke Google Sheets', 'error');
+                throw err;
+            }
+        }
+
+
+                // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             updateDashboard();
             renderTenants();
@@ -746,7 +769,7 @@
                         size: ktpFile.size,
                         data: e.target.result
                     };
-                    
+                    // call async saveTenant (no await here because FileReader callback cannot be awaited)
                     saveTenant(ktpData);
                 };
                 reader.readAsDataURL(ktpFile);
@@ -755,7 +778,8 @@
             }
         }
         
-        function saveTenant(ktpData) {
+        
+        async function saveTenant(ktpData) {
             const tenant = {
                 id: Date.now(),
                 name: document.getElementById('tenantName').value,
@@ -765,28 +789,45 @@
                 joinDate: new Date().toISOString().split('T')[0],
                 ktpFile: ktpData
             };
-            
+
+            // Optimistically update UI
             tenants.push(tenant);
-            localStorage.setItem('kostenants', JSON.stringify(tenants));
-            
-            addActivity(`Penghuni baru ${tenant.name} ditambahkan ke kamar ${tenant.room}`);
-            
-            document.getElementById('tenantForm').reset();
-            hideModal(tenantModal);
-            showNotification('Penghuni berhasil ditambahkan!', 'success');
-            
-            updateDashboard();
             renderTenants();
+            updateDashboard();
             renderReports();
             updateBillTenantSelect();
+
+            // Send to Google Sheets
+            try {
+                await saveToSheet('tenants', [
+                    tenant.id,
+                    tenant.name,
+                    tenant.room,
+                    tenant.phone,
+                    tenant.monthlyRate,
+                    tenant.joinDate,
+                    tenant.ktpFile ? tenant.ktpFile.data : ""
+                ]);
+                addActivity(`Penghuni baru ${tenant.name} ditambahkan ke kamar ${tenant.room}`);
+                document.getElementById('tenantForm').reset();
+                hideModal(tenantModal);
+                showNotification('Penghuni berhasil ditambahkan dan disimpan ke Google Sheets!', 'success');
+            } catch (err) {
+                showNotification('Gagal menyimpan penghuni ke Google Sheets.', 'error');
+            }
         }
 
-        function handleBillSubmit(e) {
+        
+        async function handleBillSubmit(e) {
             e.preventDefault();
-            
+
             const tenantId = parseInt(document.getElementById('billTenant').value);
             const tenant = tenants.find(t => t.id === tenantId);
-            
+            if (!tenant) {
+                showNotification('Penghuni tidak ditemukan. Tambahkan terlebih dahulu.', 'error');
+                return;
+            }
+
             const bill = {
                 id: Date.now(),
                 tenantId: tenantId,
@@ -798,36 +839,62 @@
                 status: 'pending',
                 createdDate: new Date().toISOString().split('T')[0]
             };
-            
+
+            // Optimistically update UI
             bills.push(bill);
-            localStorage.setItem('kosbills', JSON.stringify(bills));
-            
-            addActivity(`Tagihan sebesar Rp ${bill.amount.toLocaleString('id-ID')} dibuat untuk ${tenant.name}`);
-            
-            document.getElementById('billForm').reset();
-            hideModal(billModal);
-            showNotification('Tagihan berhasil dibuat!', 'success');
-            
-            updateDashboard();
             renderBills();
             renderReminders();
             renderReports();
+            updateDashboard();
+
+            try {
+                await saveToSheet('bills', [
+                    bill.id,
+                    bill.tenantId,
+                    bill.tenantName,
+                    bill.room,
+                    bill.amount,
+                    bill.dueDate,
+                    bill.status,
+                    bill.description,
+                    bill.createdDate
+                ]);
+                addActivity(`Tagihan sebesar Rp ${bill.amount.toLocaleString('id-ID')} dibuat untuk ${tenant.name}`);
+                document.getElementById('billForm').reset();
+                hideModal(billModal);
+                showNotification('Tagihan berhasil dibuat dan disimpan ke Google Sheets!', 'success');
+            } catch (err) {
+                showNotification('Gagal menyimpan tagihan ke Google Sheets.', 'error');
+            }
         }
 
-        function addActivity(message) {
-            activities.unshift({
+        
+        async function addActivity(message) {
+            const activity = {
                 id: Date.now(),
                 message: message,
                 date: new Date().toISOString()
-            });
-            
-            // Keep only last 20 activities
-            if (activities.length > 20) {
-                activities = activities.slice(0, 20);
-            }
-            
-            localStorage.setItem('kosactivities', JSON.stringify(activities));
+            };
+
+            // Update local activities (keep recent 20)
+            activities.unshift(activity);
+            if (activities.length > 20) activities = activities.slice(0,20);
             renderActivities();
+
+            try {
+                await saveToSheet('activities', [
+                    activity.id,
+                    activity.message,
+                    activity.date
+                ]);
+                console.log('Activity saved to Google Sheets');
+            } catch (err) {
+                console.error('Failed to save activity', err);
+            }
+        }
+
+            // localStorage disabled (now using Google Sheets)
+renderActivities();
         }
 
         function updateDashboard() {
@@ -1295,13 +1362,11 @@
             if (confirm('Apakah Anda yakin ingin menghapus penghuni ini? Semua tagihan terkait juga akan dihapus.')) {
                 const tenant = tenants.find(t => t.id === id);
                 tenants = tenants.filter(t => t.id !== id);
-                localStorage.setItem('kostenants', JSON.stringify(tenants));
-                
-                // Also delete related bills
+                // localStorage disabled (now using Google Sheets)
+// Also delete related bills
                 bills = bills.filter(b => b.tenantId !== id);
-                localStorage.setItem('kosbills', JSON.stringify(bills));
-                
-                addActivity(`Penghuni ${tenant.name} dihapus dari sistem`);
+                // localStorage disabled (now using Google Sheets)
+addActivity(`Penghuni ${tenant.name} dihapus dari sistem`);
                 
                 showNotification('Penghuni berhasil dihapus!', 'success');
                 updateDashboard();
@@ -1317,9 +1382,8 @@
             if (confirm('Apakah Anda yakin ingin menghapus tagihan ini?')) {
                 const bill = bills.find(b => b.id === id);
                 bills = bills.filter(b => b.id !== id);
-                localStorage.setItem('kosbills', JSON.stringify(bills));
-                
-                addActivity(`Tagihan ${bill.tenantName} sebesar Rp ${bill.amount.toLocaleString('id-ID')} dihapus`);
+                // localStorage disabled (now using Google Sheets)
+addActivity(`Tagihan ${bill.tenantName} sebesar Rp ${bill.amount.toLocaleString('id-ID')} dihapus`);
                 
                 showNotification('Tagihan berhasil dihapus!', 'success');
                 updateDashboard();
@@ -1335,9 +1399,8 @@
             bill.paidDate = new Date().toISOString().split('T')[0];
             bill.paymentTime = new Date().toLocaleTimeString('id-ID');
             
-            localStorage.setItem('kosbills', JSON.stringify(bills));
-            
-            addActivity(`Tagihan ${bill.tenantName} sebesar Rp ${bill.amount.toLocaleString('id-ID')} telah dibayar`);
+            // localStorage disabled (now using Google Sheets)
+addActivity(`Tagihan ${bill.tenantName} sebesar Rp ${bill.amount.toLocaleString('id-ID')} telah dibayar`);
             
             showNotification('Tagihan berhasil ditandai sebagai lunas!', 'success');
             updateDashboard();
@@ -1467,9 +1530,8 @@
                 };
 
                 // Save to localStorage
-                localStorage.setItem('kostLogo', JSON.stringify(logoData));
-                
-                // Display logo
+                // localStorage disabled (now using Google Sheets)
+// Display logo
                 displayLogo(logoData);
                 
                 addActivity('Logo kost berhasil diperbarui');
