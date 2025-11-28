@@ -80,7 +80,6 @@
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-full">
     <div id="app" class="min-h-full">
-        <!-- Header -->
         <header class="glass-effect shadow-xl border-b border-white/20 sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center py-4">
@@ -125,7 +124,6 @@
             </div>
         </header>
 
-        <!-- Navigation Tabs -->
         <nav class="bg-white/80 backdrop-blur-sm shadow-sm sticky top-16 z-30">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex space-x-8 overflow-x-auto">
@@ -163,11 +161,8 @@
             </div>
         </nav>
 
-        <!-- Main Content -->
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Dashboard Tab -->
             <div id="dashboard-tab" class="tab-content">
-                <!-- Stats Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-emerald-500 card-hover">
                         <div class="flex items-center justify-between">
@@ -230,9 +225,7 @@
                     </div>
                 </div>
 
-                <!-- Charts and Activities Row -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                    <!-- Revenue Chart -->
                     <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
                         <div class="flex items-center justify-between mb-6">
                             <h3 class="text-lg font-bold text-gray-900">Pendapatan Bulanan</h3>
@@ -275,7 +268,6 @@
                         </div>
                     </div>
 
-                    <!-- Recent Activities -->
                     <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
                         <h3 class="text-lg font-bold text-gray-900 mb-6">Aktivitas Terbaru</h3>
                         <div id="recentActivities" class="space-y-4 max-h-80 overflow-y-auto">
@@ -290,7 +282,6 @@
                     </div>
                 </div>
 
-                <!-- Quick Actions -->
                 <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
                     <h3 class="text-lg font-bold text-gray-900 mb-6">Aksi Cepat</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -316,7 +307,6 @@
                 </div>
             </div>
 
-            <!-- Tenants Tab -->
             <div id="tenants-tab" class="tab-content hidden">
                 <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
@@ -340,12 +330,10 @@
                         </div>
                     </div>
                     <div id="tenantsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Tenant cards will be inserted here -->
-                    </div>
+                        </div>
                 </div>
             </div>
 
-            <!-- Bills Tab -->
             <div id="bills-tab" class="tab-content hidden">
                 <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
@@ -381,14 +369,12 @@
                                 </tr>
                             </thead>
                             <tbody id="billsTable" class="bg-white divide-y divide-gray-200">
-                                <!-- Bills will be inserted here -->
-                            </tbody>
+                                </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Reminders Tab -->
             <div id="reminders-tab" class="tab-content hidden">
                 <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
                     <div class="flex justify-between items-center mb-6">
@@ -404,15 +390,12 @@
                         </button>
                     </div>
                     <div id="remindersList" class="space-y-4">
-                        <!-- Reminders will be inserted here -->
-                    </div>
+                        </div>
                 </div>
             </div>
 
-            <!-- Reports Tab -->
             <div id="reports-tab" class="tab-content hidden">
                 <div class="space-y-6">
-                    <!-- Summary Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
                             <div class="flex items-center justify-between">
@@ -457,7 +440,6 @@
                         </div>
                     </div>
 
-                    <!-- Detailed Reports -->
                     <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
                         <h3 class="text-xl font-bold text-gray-900 mb-6">Laporan Detail</h3>
                         <div class="space-y-4">
@@ -483,7 +465,6 @@
             </div>
         </main>
 
-        <!-- Add Tenant Modal -->
         <div id="tenantModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 max-h-full overflow-y-auto">
                 <div class="flex justify-between items-center p-6 border-b border-gray-200">
@@ -512,7 +493,7 @@
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Upload KTP</label>
                             <div class="relative">
                                 <input type="file" id="ktpFile" accept="image/*,.pdf" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
-                                <p class="text-xs text-gray-500 mt-2">Format: JPG, PNG, atau PDF (Maks. 5MB)</p>
+                                <p class="text-xs text-gray-500 mt-2">Format: JPG, PNG, atau PDF (Maks. 5MB). Akan disimpan di Google Drive melalui Apps Script.</p>
                             </div>
                         </div>
                         <div>
@@ -528,7 +509,6 @@
             </div>
         </div>
 
-        <!-- Add Bill Modal -->
         <div id="billModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 max-h-full overflow-y-auto">
                 <div class="flex justify-between items-center p-6 border-b border-gray-200">
@@ -568,7 +548,6 @@
             </div>
         </div>
 
-        <!-- KTP Viewer Modal -->
         <div id="ktpModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-full overflow-y-auto">
                 <div class="flex justify-between items-center p-6 border-b border-gray-200">
@@ -580,8 +559,7 @@
                     </button>
                 </div>
                 <div id="ktpContent" class="p-6 text-center">
-                    <!-- KTP content will be inserted here -->
-                </div>
+                    </div>
                 <div class="flex justify-end space-x-3 p-6 border-t border-gray-200">
                     <button id="downloadKtp" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 mr-3">
                         Download
@@ -593,7 +571,6 @@
             </div>
         </div>
 
-        <!-- Notification -->
         <div id="notification" class="fixed top-4 right-4 bg-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl hidden notification z-50 max-w-sm">
             <div class="flex items-center">
                 <svg class="w-6 h-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -605,10 +582,110 @@
     </div>
 
     <script>
-        // Data storage
-let tenants = [];
-let bills = [];
-let activities = [];
+        // =====================================================================
+        // KONFIGURASI PENTING (WAJIB DIGANTI)
+        // =====================================================================
+        
+        // PASTE URL WEB APP APPS SCRIPT ANDA DI BAWAH INI
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxANtvCXGcBrefAPUMvLJ_yTVTY30q1RClgG4YvwX4/dev'; 
+        // Contoh: 'https://script.google.com/macros/s/AKfycbyJ9V_r.../exec'
+        
+        // =====================================================================
+        // DATA STORAGE (Sekarang diurus oleh Apps Script)
+        // =====================================================================
+
+        let tenants = []; // Data Penghuni dari Apps Script
+        let bills = [];   // Data Tagihan dari Apps Script
+        let activities = []; // Data Aktivitas dari Apps Script
+        
+        // =====================================================================
+        // API HELPER FUNCTION
+        // =====================================================================
+
+        /**
+         * Fungsi helper untuk melakukan panggilan POST ke Google Apps Script API.
+         * @param {object} data Objek data yang berisi 'action' dan parameter lainnya.
+         */
+        async function callApi(data) {
+            if (SCRIPT_URL.includes('PASTE_URL')) {
+                 showNotification('Error: Harap ganti SCRIPT_URL di dalam tag <script> dengan URL Web App Anda.', 'error');
+                 throw new Error("SCRIPT_URL not configured.");
+            }
+            
+            const formData = new FormData();
+            for (const key in data) {
+                // Konversi objek ktpFile/logo menjadi string JSON agar bisa ditransfer
+                if ((key === 'ktpFile' || key === 'logoData') && data[key] !== null && typeof data[key] === 'object') {
+                    formData.append(key, JSON.stringify(data[key]));
+                } else if (data[key] !== null && data[key] !== undefined) {
+                    formData.append(key, data[key]);
+                }
+            }
+            
+            // Konversi FormData ke URLSearchParams untuk fetch (Apps Script lebih suka ini)
+            const urlParams = new URLSearchParams(formData);
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    body: urlParams
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const jsonResponse = await response.json();
+                
+                if (!jsonResponse.success) {
+                    throw new Error(jsonResponse.error || "Operation failed on server side.");
+                }
+                
+                return jsonResponse.data;
+
+            } catch (error) {
+                console.error("API Call Error:", error);
+                showNotification(`Gagal terhubung ke server: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+        
+        /**
+         * Memuat semua data awal (Tenants, Bills, Activities, Logo) dari Apps Script.
+         */
+        async function loadInitialData() {
+            showNotification('Memuat data dari Google Sheet...', 'info');
+            try {
+                const data = await callApi({ action: 'loadData' });
+                
+                // Simpan data ke variabel global
+                tenants = data.tenants || [];
+                bills = data.bills || [];
+                activities = data.activities || [];
+                
+                // Muat logo dari API
+                const logoData = await callApi({ action: 'loadLogo' });
+                if(logoData.logoData) {
+                    displayLogo(JSON.parse(logoData.logoData));
+                }
+                
+                // Lanjutkan dengan rendering
+                updateDashboard();
+                renderTenants();
+                renderBills();
+                renderReminders();
+                renderReports();
+                updateBillTenantSelect();
+
+                showNotification('Data berhasil dimuat!', 'success');
+
+            } catch (error) {
+                console.error("Failed to load initial data:", error);
+                showNotification('Gagal memuat data awal. Cek URL Web App Anda dan pastikan Apps Script sudah di Deploy.', 'error');
+            }
+        }
+
 
         // DOM elements
         const tabBtns = document.querySelectorAll('.tab-btn');
@@ -618,38 +695,9 @@ let activities = [];
         const ktpModal = document.getElementById('ktpModal');
         const notification = document.getElementById('notification');
 
-
-        // Google Sheets POST helper (uses your deployed Web App)
-        async function saveToSheet(sheet, rowArray) {
-            const url = "https://script.google.com/macros/s/AKfycbyJp4A2R4jeVsjkaUuWyDE3eotx8HiHCigXNmFhzHEleYA1MLRV-qFzLNy4JV6EBDgArQ/exec";
-            try {
-                const res = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        sheet: sheet,
-                        row: rowArray
-                    })
-                });
-                // Try parse response (Apps Script may return text)
-                try { return await res.json(); } catch (e) { return {ok: true}; }
-            } catch (err) {
-                console.error('saveToSheet error', err);
-                showNotification('Gagal menyimpan ke Google Sheets', 'error');
-                throw err;
-            }
-        }
-
-
-                // Initialize app
-        document.addEventListener('DOMContentLoaded', function() {
-            updateDashboard();
-            renderTenants();
-            renderBills();
-            renderReminders();
-            renderReports();
-            updateBillTenantSelect();
-            loadLogo();
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadInitialData(); // Panggil fungsi pemuatan data dari Apps Script
             
             // Set default due date to next month
             const nextMonth = new Date();
@@ -705,7 +753,7 @@ let activities = [];
         document.getElementById('cancelBill').addEventListener('click', () => hideModal(billModal));
 
         // Quick actions
-        document.getElementById('exportData').addEventListener('click', exportData);
+        document.getElementById('exportData').addEventListener('click', () => showNotification('Fungsi Export Data (Lokal) Dinonaktifkan. Data disimpan di Google Sheet.', 'warning'));
         document.getElementById('sendReminders').addEventListener('click', sendReminders);
 
         // Form handlers
@@ -747,29 +795,28 @@ let activities = [];
             }, 4000);
         }
 
-        function handleTenantSubmit(e) {
+        async function handleTenantSubmit(e) {
             e.preventDefault();
             
             const ktpFile = document.getElementById('ktpFile').files[0];
-            let ktpData = null;
             
-            // Validate file size (5MB max)
+            // 1. Validasi file size (5MB max)
             if (ktpFile && ktpFile.size > 5 * 1024 * 1024) {
                 showNotification('Ukuran file KTP terlalu besar. Maksimal 5MB.', 'error');
                 return;
             }
             
-            // Convert file to base64 for storage
+            // 2. Convert file to base64 for transfer/storage
             if (ktpFile) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    ktpData = {
+                    const ktpData = {
                         name: ktpFile.name,
                         type: ktpFile.type,
                         size: ktpFile.size,
-                        data: e.target.result
+                        data: e.target.result // Base64 string
                     };
-                    // call async saveTenant (no await here because FileReader callback cannot be awaited)
+                    
                     saveTenant(ktpData);
                 };
                 reader.readAsDataURL(ktpFile);
@@ -778,10 +825,9 @@ let activities = [];
             }
         }
         
-        
         async function saveTenant(ktpData) {
-            const tenant = {
-                id: Date.now(),
+            const tenantPayload = {
+                action: 'addTenant',
                 name: document.getElementById('tenantName').value,
                 room: document.getElementById('roomNumber').value,
                 phone: document.getElementById('phoneNumber').value,
@@ -789,47 +835,35 @@ let activities = [];
                 joinDate: new Date().toISOString().split('T')[0],
                 ktpFile: ktpData
             };
-
-            // Optimistically update UI
-            tenants.push(tenant);
-            renderTenants();
-            updateDashboard();
-            renderReports();
-            updateBillTenantSelect();
-
-            // Send to Google Sheets
+            
             try {
-                await saveToSheet('tenants', [
-                    tenant.id,
-                    tenant.name,
-                    tenant.room,
-                    tenant.phone,
-                    tenant.monthlyRate,
-                    tenant.joinDate,
-                    tenant.ktpFile ? tenant.ktpFile.data : ""
-                ]);
-                addActivity(`Penghuni baru ${tenant.name} ditambahkan ke kamar ${tenant.room}`);
+                await callApi(tenantPayload);
+
                 document.getElementById('tenantForm').reset();
                 hideModal(tenantModal);
-                showNotification('Penghuni berhasil ditambahkan dan disimpan ke Google Sheets!', 'success');
-            } catch (err) {
-                showNotification('Gagal menyimpan penghuni ke Google Sheets.', 'error');
+                showNotification('Penghuni berhasil ditambahkan!', 'success');
+                
+                // Muat ulang semua data setelah berhasil
+                await loadInitialData(); 
+                
+            } catch (error) {
+                // Notifikasi error sudah ditangani di callApi
             }
         }
 
-        
         async function handleBillSubmit(e) {
             e.preventDefault();
-
+            
             const tenantId = parseInt(document.getElementById('billTenant').value);
             const tenant = tenants.find(t => t.id === tenantId);
+            
             if (!tenant) {
-                showNotification('Penghuni tidak ditemukan. Tambahkan terlebih dahulu.', 'error');
+                showNotification('Pilih penghuni yang valid!', 'error');
                 return;
             }
-
-            const bill = {
-                id: Date.now(),
+            
+            const billPayload = {
+                action: 'addBill',
                 tenantId: tenantId,
                 tenantName: tenant.name,
                 room: tenant.room,
@@ -839,62 +873,34 @@ let activities = [];
                 status: 'pending',
                 createdDate: new Date().toISOString().split('T')[0]
             };
-
-            // Optimistically update UI
-            bills.push(bill);
-            renderBills();
-            renderReminders();
-            renderReports();
-            updateDashboard();
-
+            
             try {
-                await saveToSheet('bills', [
-                    bill.id,
-                    bill.tenantId,
-                    bill.tenantName,
-                    bill.room,
-                    bill.amount,
-                    bill.dueDate,
-                    bill.status,
-                    bill.description,
-                    bill.createdDate
-                ]);
-                addActivity(`Tagihan sebesar Rp ${bill.amount.toLocaleString('id-ID')} dibuat untuk ${tenant.name}`);
+                await callApi(billPayload);
+                
                 document.getElementById('billForm').reset();
                 hideModal(billModal);
-                showNotification('Tagihan berhasil dibuat dan disimpan ke Google Sheets!', 'success');
-            } catch (err) {
-                showNotification('Gagal menyimpan tagihan ke Google Sheets.', 'error');
+                showNotification('Tagihan berhasil dibuat!', 'success');
+                
+                // Muat ulang semua data setelah berhasil
+                await loadInitialData();
+                
+            } catch (error) {
+                // Notifikasi error sudah ditangani di callApi
             }
         }
 
-        
         async function addActivity(message) {
-            const activity = {
-                id: Date.now(),
-                message: message,
-                date: new Date().toISOString()
-            };
-
-            // Update local activities (keep recent 20)
-            activities.unshift(activity);
-            if (activities.length > 20) activities = activities.slice(0,20);
-            renderActivities();
-
             try {
-                await saveToSheet('activities', [
-                    activity.id,
-                    activity.message,
-                    activity.date
-                ]);
-                console.log('Activity saved to Google Sheets');
-            } catch (err) {
-                console.error('Failed to save activity', err);
+                // Kirim log aktivitas ke Apps Script
+                await callApi({ action: 'addActivity', message: message });
+                
+                // Tidak perlu loadInitialData, cukup render aktivitas
+                // Note: Pada implementasi Apps Script, Apps Script sudah mengurus log.
+                // Kita akan refresh aktivitas pada loadInitialData atau saat rendering.
+                
+            } catch (error) {
+                console.error('Failed to log activity:', error);
             }
-        }
-
-            // localStorage disabled (now using Google Sheets)
-renderActivities();
         }
 
         function updateDashboard() {
@@ -902,7 +908,7 @@ renderActivities();
             document.getElementById('activeBills').textContent = bills.filter(b => b.status === 'pending').length;
             
             const today = new Date().toISOString().split('T')[0];
-            const dueBills = bills.filter(b => b.status === 'pending' && b.dueDate <= today).length;
+            const dueBills = bills.filter(b => b.status === 'pending' && b.dueDate >= today).length;
             const overdueBills = bills.filter(b => b.status === 'pending' && b.dueDate < today).length;
             
             document.getElementById('dueBills').textContent = dueBills;
@@ -1040,6 +1046,10 @@ renderActivities();
                 const status = bill.status === 'paid' ? 'paid' : (isOverdue ? 'overdue' : 'pending');
                 const config = statusConfig[status];
                 
+                // Cari data kamar dari tenant
+                const tenant = tenants.find(t => t.id === bill.tenantId);
+                const roomNumber = tenant ? tenant.room : 'N/A';
+                
                 return `
                     <tr class="hover:bg-gray-50 transition-colors duration-200">
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -1048,7 +1058,7 @@ renderActivities();
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                                ${bill.room}
+                                ${roomNumber}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">Rp ${bill.amount.toLocaleString('id-ID')}</td>
@@ -1079,7 +1089,6 @@ renderActivities();
 
         function renderReminders() {
             const container = document.getElementById('remindersList');
-            const today = new Date().toISOString().split('T')[0];
             const pendingBills = bills.filter(b => b.status === 'pending');
             
             if (pendingBills.length === 0) {
@@ -1100,6 +1109,10 @@ renderActivities();
                 const daysDiff = Math.ceil((dueDate - new Date()) / (1000 * 60 * 60 * 24));
                 const isOverdue = daysDiff < 0;
                 const isDueSoon = daysDiff <= 3 && daysDiff >= 0;
+                
+                // Cari data kamar dari tenant
+                const tenant = tenants.find(t => t.id === bill.tenantId);
+                const roomNumber = tenant ? tenant.room : 'N/A';
                 
                 let alertConfig = {
                     class: 'bg-blue-50 border-blue-200',
@@ -1134,7 +1147,7 @@ renderActivities();
                             </div>
                             <div class="ml-4 flex-1">
                                 <div class="flex items-center justify-between mb-2">
-                                    <h4 class="text-lg font-bold text-gray-900">${bill.tenantName} - Kamar ${bill.room}</h4>
+                                    <h4 class="text-lg font-bold text-gray-900">${bill.tenantName} - Kamar ${roomNumber}</h4>
                                     <span class="text-xs font-bold px-2 py-1 rounded-full ${alertConfig.priority === 'urgent' ? 'bg-red-200 text-red-800' : alertConfig.priority === 'warning' ? 'bg-amber-200 text-amber-800' : 'bg-blue-200 text-blue-800'}">${alertConfig.priority.toUpperCase()}</span>
                                 </div>
                                 <p class="text-sm font-semibold text-gray-700 mb-2">${alertConfig.message}</p>
@@ -1321,6 +1334,10 @@ renderActivities();
                 const status = bill.status === 'paid' ? 'paid' : (isOverdue ? 'overdue' : 'pending');
                 const config = statusConfig[status];
                 
+                // Cari data kamar dari tenant
+                const tenant = tenants.find(t => t.id === bill.tenantId);
+                const roomNumber = tenant ? tenant.room : 'N/A';
+                
                 return `
                     <tr class="hover:bg-gray-50 transition-colors duration-200">
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -1329,7 +1346,7 @@ renderActivities();
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                                ${bill.room}
+                                ${roomNumber}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">Rp ${bill.amount.toLocaleString('id-ID')}</td>
@@ -1358,60 +1375,67 @@ renderActivities();
             }).join('');
         }
 
-        function deleteTenant(id) {
+        async function deleteTenant(id) {
             if (confirm('Apakah Anda yakin ingin menghapus penghuni ini? Semua tagihan terkait juga akan dihapus.')) {
-                const tenant = tenants.find(t => t.id === id);
-                tenants = tenants.filter(t => t.id !== id);
-                // localStorage disabled (now using Google Sheets)
-// Also delete related bills
-                bills = bills.filter(b => b.tenantId !== id);
-                // localStorage disabled (now using Google Sheets)
-addActivity(`Penghuni ${tenant.name} dihapus dari sistem`);
                 
-                showNotification('Penghuni berhasil dihapus!', 'success');
-                updateDashboard();
-                renderTenants();
-                renderBills();
-                renderReminders();
-                renderReports();
-                updateBillTenantSelect();
+                try {
+                    await callApi({ action: 'deleteTenant', id: id });
+                    
+                    showNotification('Penghuni berhasil dihapus!', 'success');
+                    
+                    // Muat ulang semua data setelah berhasil
+                    await loadInitialData();
+                    
+                } catch (error) {
+                    // Notifikasi error sudah ditangani di callApi
+                }
             }
         }
 
-        function deleteBill(id) {
+        async function deleteBill(id) {
             if (confirm('Apakah Anda yakin ingin menghapus tagihan ini?')) {
-                const bill = bills.find(b => b.id === id);
-                bills = bills.filter(b => b.id !== id);
-                // localStorage disabled (now using Google Sheets)
-addActivity(`Tagihan ${bill.tenantName} sebesar Rp ${bill.amount.toLocaleString('id-ID')} dihapus`);
                 
-                showNotification('Tagihan berhasil dihapus!', 'success');
-                updateDashboard();
-                renderBills();
-                renderReminders();
-                renderReports();
+                try {
+                    await callApi({ action: 'deleteBill', id: id });
+                    
+                    showNotification('Tagihan berhasil dihapus!', 'success');
+                    
+                    // Muat ulang semua data setelah berhasil
+                    await loadInitialData();
+                    
+                } catch (error) {
+                    // Notifikasi error sudah ditangani di callApi
+                }
             }
         }
 
-        function markAsPaid(id) {
+        async function markAsPaid(id) {
             const bill = bills.find(b => b.id === id);
-            bill.status = 'paid';
-            bill.paidDate = new Date().toISOString().split('T')[0];
-            bill.paymentTime = new Date().toLocaleTimeString('id-ID');
+            if (!bill) return;
             
-            // localStorage disabled (now using Google Sheets)
-addActivity(`Tagihan ${bill.tenantName} sebesar Rp ${bill.amount.toLocaleString('id-ID')} telah dibayar`);
+            const payload = {
+                action: 'updateBillStatus',
+                id: id,
+                status: 'paid',
+                paidDate: new Date().toISOString().split('T')[0],
+                paymentTime: new Date().toLocaleTimeString('id-ID'),
+            };
             
-            showNotification('Tagihan berhasil ditandai sebagai lunas!', 'success');
-            updateDashboard();
-            renderBills();
-            renderReminders();
-            renderReports();
-            
-            // Automatically generate and print invoice
-            setTimeout(() => {
-                generateInvoice(bill);
-            }, 1000);
+            try {
+                await callApi(payload);
+                
+                showNotification('Tagihan berhasil ditandai sebagai lunas!', 'success');
+                
+                // Muat ulang semua data setelah berhasil
+                await loadInitialData(); 
+                
+                // Automatically generate and print invoice
+                setTimeout(() => {
+                    generateInvoice(id);
+                }, 1000);
+            } catch (error) {
+                // Notifikasi error sudah ditangani di callApi
+            }
         }
 
         function viewKTP(tenantId) {
@@ -1421,23 +1445,32 @@ addActivity(`Tagihan ${bill.tenantName} sebesar Rp ${bill.amount.toLocaleString(
                 return;
             }
 
+            // kptFile kini adalah JSON string, harus di parse
+            let ktpData;
+            try {
+                ktpData = JSON.parse(tenant.ktpFile);
+            } catch (e) {
+                ktpData = tenant.ktpFile; // Jika sudah terlanjur objek (untuk kompatibilitas)
+            }
+
+
             const ktpContent = document.getElementById('ktpContent');
             const downloadBtn = document.getElementById('downloadKtp');
             
-            if (tenant.ktpFile.type.startsWith('image/')) {
+            if (ktpData.type.startsWith('image/')) {
                 ktpContent.innerHTML = `
-                    <img src="${tenant.ktpFile.data}" alt="KTP ${tenant.name}" class="max-w-full h-auto rounded-xl shadow-lg">
-                    <p class="text-sm text-gray-600 mt-4 font-medium">${tenant.ktpFile.name} (${(tenant.ktpFile.size / 1024).toFixed(1)} KB)</p>
+                    <img src="${ktpData.data}" alt="KTP ${tenant.name}" class="max-w-full h-auto rounded-xl shadow-lg">
+                    <p class="text-sm text-gray-600 mt-4 font-medium">${ktpData.name} (${(ktpData.size / 1024).toFixed(1)} KB)</p>
                 `;
-            } else if (tenant.ktpFile.type === 'application/pdf') {
+            } else if (ktpData.type === 'application/pdf') {
                 ktpContent.innerHTML = `
                     <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-12 rounded-xl">
                         <svg class="w-20 h-20 text-red-500 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                         </svg>
                         <p class="text-xl font-bold text-gray-900 mb-2">Dokumen PDF</p>
-                        <p class="text-sm text-gray-600 mb-2 font-medium">${tenant.ktpFile.name}</p>
-                        <p class="text-sm text-gray-500 mb-4">${(tenant.ktpFile.size / 1024).toFixed(1)} KB</p>
+                        <p class="text-sm text-gray-600 mb-2 font-medium">${ktpData.name}</p>
+                        <p class="text-sm text-gray-500 mb-4">${(ktpData.size / 1024).toFixed(1)} KB</p>
                         <p class="text-xs text-gray-500">Klik tombol Download untuk melihat dokumen</p>
                     </div>
                 `;
@@ -1445,8 +1478,8 @@ addActivity(`Tagihan ${bill.tenantName} sebesar Rp ${bill.amount.toLocaleString(
 
             downloadBtn.onclick = function() {
                 const link = document.createElement('a');
-                link.href = tenant.ktpFile.data;
-                link.download = tenant.ktpFile.name;
+                link.href = ktpData.data;
+                link.download = ktpData.name;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -1456,34 +1489,7 @@ addActivity(`Tagihan ${bill.tenantName} sebesar Rp ${bill.amount.toLocaleString(
             showModal(ktpModal);
         }
 
-        function exportData() {
-            const data = {
-                tenants: tenants,
-                bills: bills,
-                activities: activities,
-                exportDate: new Date().toISOString(),
-                summary: {
-                    totalTenants: tenants.length,
-                    totalBills: bills.length,
-                    totalRevenue: bills.filter(b => b.status === 'paid').reduce((sum, bill) => sum + bill.amount, 0)
-                }
-            };
-            
-            const dataStr = JSON.stringify(data, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `cenderawasih-kost-data-${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            addActivity('Data sistem berhasil diekspor');
-            showNotification('Data berhasil diekspor!', 'success');
-        }
-
-        function sendReminders() {
+        async function sendReminders() {
             const pendingBills = bills.filter(b => b.status === 'pending');
             if (pendingBills.length === 0) {
                 showNotification('Tidak ada tagihan yang perlu diingatkan', 'info');
@@ -1491,51 +1497,53 @@ addActivity(`Tagihan ${bill.tenantName} sebesar Rp ${bill.amount.toLocaleString(
             }
             
             // Simulate sending reminders
-            addActivity(`Pengingat dikirim untuk ${pendingBills.length} tagihan`);
-            showNotification(`Pengingat berhasil dikirim untuk ${pendingBills.length} tagihan!`, 'success');
+            await addActivity(`Pengingat dikirim untuk ${pendingBills.length} tagihan (Simulasi)`);
+            showNotification(`Pengingat berhasil dikirim untuk ${pendingBills.length} tagihan! (Simulasi)`, 'success');
         }
 
-        function sendReminderToTenant(billId) {
+        async function sendReminderToTenant(billId) {
             const bill = bills.find(b => b.id === billId);
             if (!bill) return;
             
             // Simulate sending individual reminder
-            addActivity(`Pengingat dikirim ke ${bill.tenantName} untuk tagihan Rp ${bill.amount.toLocaleString('id-ID')}`);
-            showNotification(`Pengingat berhasil dikirim ke ${bill.tenantName}!`, 'success');
+            await addActivity(`Pengingat dikirim ke ${bill.tenantName} untuk tagihan Rp ${bill.amount.toLocaleString('id-ID')} (Simulasi)`);
+            showNotification(`Pengingat berhasil dikirim ke ${bill.tenantName}! (Simulasi)`, 'success');
         }
 
-        function handleLogoUpload(event) {
+        async function handleLogoUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            // Validate file type
+            // 1. Validasi file
             if (!file.type.startsWith('image/')) {
                 showNotification('Hanya file gambar yang diperbolehkan', 'error');
                 return;
             }
-
-            // Validate file size (2MB max)
             if (file.size > 2 * 1024 * 1024) {
                 showNotification('Ukuran file terlalu besar. Maksimal 2MB.', 'error');
                 return;
             }
 
+            // 2. Convert to base64 and save
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 const logoData = {
                     name: file.name,
                     type: file.type,
                     size: file.size,
-                    data: e.target.result
+                    data: e.target.result // Base64 string
                 };
 
-                // Save to localStorage
-                // localStorage disabled (now using Google Sheets)
-// Display logo
-                displayLogo(logoData);
-                
-                addActivity('Logo kost berhasil diperbarui');
-                showNotification('Logo berhasil diupload!', 'success');
+                try {
+                    await callApi({ action: 'uploadLogo', logoData: logoData });
+                    
+                    // 3. Display logo
+                    displayLogo(logoData);
+                    
+                    showNotification('Logo berhasil diupload!', 'success');
+                } catch (error) {
+                    // Notifikasi error sudah ditangani di callApi
+                }
             };
             reader.readAsDataURL(file);
         }
@@ -1556,43 +1564,39 @@ addActivity(`Tagihan ${bill.tenantName} sebesar Rp ${bill.amount.toLocaleString(
             logoFrame.classList.add('border-solid', 'border-indigo-300');
         }
 
-        function loadLogo() {
-            const savedLogo = localStorage.getItem('kostLogo');
-            if (savedLogo) {
-                try {
-                    const logoData = JSON.parse(savedLogo);
-                    displayLogo(logoData);
-                } catch (error) {
-                    console.error('Error loading logo:', error);
-                }
-            }
-        }
-
-        function removeLogo() {
+        async function removeLogo() {
             if (confirm('Apakah Anda yakin ingin menghapus logo?')) {
-                const logoImage = document.getElementById('logoImage');
-                const logoPlaceholder = document.getElementById('logoPlaceholder');
-                const removeBtn = document.getElementById('removeLogo');
-                const logoFrame = document.getElementById('logoFrame');
-                const logoUpload = document.getElementById('logoUpload');
+                
+                try {
+                    // Kirim data kosong untuk menghapus logo dari Properties
+                    await callApi({ action: 'uploadLogo', logoData: null });
+                    
+                    const logoImage = document.getElementById('logoImage');
+                    const logoPlaceholder = document.getElementById('logoPlaceholder');
+                    const removeBtn = document.getElementById('removeLogo');
+                    const logoFrame = document.getElementById('logoFrame');
+                    const logoUpload = document.getElementById('logoUpload');
 
-                // Hide logo and show placeholder
-                logoImage.classList.add('hidden');
-                logoPlaceholder.classList.remove('hidden');
-                removeBtn.classList.add('hidden');
-                
-                // Reset frame styling
-                logoFrame.classList.add('border-dashed', 'border-gray-300');
-                logoFrame.classList.remove('border-solid', 'border-indigo-300');
-                
-                // Clear file input
-                logoUpload.value = '';
-                
-                // Remove from localStorage
-                localStorage.removeItem('kostLogo');
-                
-                addActivity('Logo kost dihapus');
-                showNotification('Logo berhasil dihapus!', 'success');
+                    // Hide logo and show placeholder
+                    logoImage.classList.add('hidden');
+                    logoPlaceholder.classList.remove('hidden');
+                    removeBtn.classList.add('hidden');
+                    
+                    // Reset frame styling
+                    logoFrame.classList.add('border-dashed', 'border-gray-300');
+                    logoFrame.classList.remove('border-solid', 'border-indigo-300');
+                    
+                    // Clear file input
+                    logoUpload.value = '';
+                    
+                    showNotification('Logo berhasil dihapus!', 'success');
+                    
+                    // Log activity
+                    await addActivity('Logo kost dihapus');
+                    
+                } catch (error) {
+                    // Notifikasi error sudah ditangani di callApi
+                }
             }
         }
 
@@ -1602,27 +1606,20 @@ addActivity(`Tagihan ${bill.tenantName} sebesar Rp ${bill.amount.toLocaleString(
                 showNotification('Hanya tagihan yang sudah lunas yang bisa dicetak', 'error');
                 return;
             }
-            generateInvoice(bill);
+            generateInvoice(billId);
         }
 
-        function generateInvoice(bill) {
+        function generateInvoice(billId) {
+            const bill = bills.find(b => b.id === billId);
             const tenant = tenants.find(t => t.id === bill.tenantId);
-            if (!tenant) return;
+            if (!bill || !tenant) return;
 
-            // Get logo data
-            const savedLogo = localStorage.getItem('kostLogo');
-            let logoSrc = '';
-            if (savedLogo) {
-                try {
-                    const logoData = JSON.parse(savedLogo);
-                    logoSrc = logoData.data;
-                } catch (error) {
-                    console.error('Error loading logo for invoice:', error);
-                }
-            }
-
+            // Get logo data (from current display, which is loaded from API)
+            const logoImage = document.getElementById('logoImage');
+            const logoSrc = logoImage.classList.contains('hidden') ? '' : logoImage.src;
+            
             // Generate invoice number
-            const invoiceNumber = `INV-${bill.id}-${new Date().getFullYear()}`;
+            const invoiceNumber = `INV-${bill.id}-${new Date(bill.paidDate).getFullYear()}`;
             
             // Create invoice HTML with Papua theme
             const invoiceHTML = `
@@ -2140,9 +2137,10 @@ addActivity(`Tagihan ${bill.tenantName} sebesar Rp ${bill.amount.toLocaleString(
             
             // Wait for content to load then print
             printWindow.onload = function() {
-                setTimeout(() => {
+                setTimeout(async () => {
                     printWindow.print();
-                    addActivity(`Invoice ${invoiceNumber} dicetak untuk ${tenant.name}`);
+                    // Log activity setelah cetak
+                    await addActivity(`Invoice ${invoiceNumber} dicetak untuk ${tenant.name}`);
                     showNotification('Invoice berhasil dicetak!', 'success');
                 }, 500);
             };
