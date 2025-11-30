@@ -3,2148 +3,634 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cenderawasih Kost Management - Sistem Manajemen Pengelolaan Kost</title>
+    <title>Cenderawasih Kost Management - Cloud System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-        .notification {
-            animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        @keyframes slideIn {
-            from { transform: translateX(100%) scale(0.8); opacity: 0; }
-            to { transform: translateX(0) scale(1); opacity: 1; }
-        }
-        .fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .card-hover {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .card-hover:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .glass-effect {
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.9);
-        }
-        .pulse-animation {
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        .loading-spinner {
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .status-badge {
-            position: relative;
-            overflow: hidden;
-        }
-        .status-badge::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s;
-        }
-        .status-badge:hover::before {
-            left: 100%;
-        }
-        .chart-container {
-            position: relative;
-            height: 200px;
-        }
-        .progress-bar {
-            transition: width 1s ease-in-out;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        /* Animasi & Style Tambahan */
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.95); }
+        .pulse-animation { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        
+        /* Loading Overlay */
+        #globalLoading { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: transparent; border-radius: 50%; animation: rotation 1s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-full">
+<body class="bg-slate-50 min-h-full pb-20">
+
+    <div id="globalLoading">
+        <span class="spinner mb-4"></span>
+        <p class="text-white font-semibold text-lg animate-pulse" id="loadingText">Menghubungkan ke Server...</p>
+    </div>
+
     <div id="app" class="min-h-full">
-        <header class="glass-effect shadow-xl border-b border-white/20 sticky top-0 z-40">
+        <header class="glass-effect shadow-sm border-b border-gray-200 sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center py-4">
                     <div class="flex items-center space-x-4">
-                        <div class="flex items-center">
-                            <div id="logoContainer" class="relative group mr-4">
-                                <div id="logoFrame" class="w-16 h-16 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-white/50 hover:border-indigo-400 hover:bg-indigo-50/50 transition-all duration-300 cursor-pointer group-hover:scale-105">
-                                    <div id="logoPlaceholder" class="text-center">
-                                        <svg class="w-6 h-6 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                        <p class="text-xs text-gray-500 font-medium">Logo</p>
-                                    </div>
-                                    <img id="logoImage" class="w-full h-full object-cover rounded-lg hidden" alt="Logo">
-                                </div>
-                                <input type="file" id="logoUpload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                                <button id="removeLogo" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors hidden">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                    </svg>
-                                </button>
+                         <div class="relative group cursor-pointer" id="logoContainer">
+                            <div id="logoFrame" class="w-12 h-12 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden bg-white">
+                                <span id="logoPlaceholder" class="text-xs text-gray-400">Logo</span>
+                                <img id="logoImage" class="w-full h-full object-cover hidden">
+                            </div>
+                            <input type="file" id="logoUpload" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+                        </div>
+                        
+                        <div>
+                            <h1 class="text-xl font-bold text-gray-900">Cenderawasih Kost</h1>
+                            <div class="flex items-center space-x-2">
+                                <span class="w-2 h-2 bg-green-500 rounded-full pulse-animation"></span>
+                                <span class="text-xs text-green-600 font-medium">Online (Google Sheets)</span>
                             </div>
                         </div>
-                        <div>
-                            <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Cenderawasih Kost</h1>
-                            <p class="text-sm text-gray-600 font-medium">Sistem Manajemen Pengelolaan Kost</p>
-                        </div>
                     </div>
-                    <div class="flex items-center space-x-4">
-                        <div class="hidden md:flex items-center space-x-2 bg-white/50 rounded-full px-4 py-2">
-                            <div class="w-2 h-2 bg-green-500 rounded-full pulse-animation"></div>
-                            <span class="text-sm font-medium text-gray-700">Online</span>
-                        </div>
-                        <button id="addTenantBtn" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:scale-105">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                            Tambah Penghuni
-                        </button>
-                    </div>
+                    <button id="addTenantBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center gap-2">
+                        <span>+</span> Tambah Penghuni
+                    </button>
                 </div>
             </div>
         </header>
 
-        <nav class="bg-white/80 backdrop-blur-sm shadow-sm sticky top-16 z-30">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex space-x-8 overflow-x-auto">
-                    <button class="tab-btn active py-4 px-4 border-b-3 border-indigo-500 text-indigo-600 font-semibold whitespace-nowrap flex items-center" data-tab="dashboard">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                        </svg>
-                        Dashboard
-                    </button>
-                    <button class="tab-btn py-4 px-4 border-b-3 border-transparent text-gray-500 hover:text-gray-700 font-semibold whitespace-nowrap flex items-center transition-colors" data-tab="tenants">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                        </svg>
-                        Penghuni
-                    </button>
-                    <button class="tab-btn py-4 px-4 border-b-3 border-transparent text-gray-500 hover:text-gray-700 font-semibold whitespace-nowrap flex items-center transition-colors" data-tab="bills">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Tagihan
-                    </button>
-                    <button class="tab-btn py-4 px-4 border-b-3 border-transparent text-gray-500 hover:text-gray-700 font-semibold whitespace-nowrap flex items-center transition-colors" data-tab="reminders">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        Pengingat
-                    </button>
-                    <button class="tab-btn py-4 px-4 border-b-3 border-transparent text-gray-500 hover:text-gray-700 font-semibold whitespace-nowrap flex items-center transition-colors" data-tab="reports">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                        </svg>
-                        Laporan
-                    </button>
+        <nav class="bg-white border-b border-gray-200 sticky top-20 z-30 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 overflow-x-auto">
+                <div class="flex space-x-6">
+                    <button class="tab-btn active py-3 border-b-2 border-indigo-600 text-indigo-600 font-medium text-sm whitespace-nowrap" data-tab="dashboard">Dashboard</button>
+                    <button class="tab-btn py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm whitespace-nowrap" data-tab="tenants">Penghuni</button>
+                    <button class="tab-btn py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm whitespace-nowrap" data-tab="bills">Tagihan</button>
+                    <button class="tab-btn py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm whitespace-nowrap" data-tab="reminders">Pengingat</button>
+                    <button class="tab-btn py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm whitespace-nowrap" data-tab="reports">Laporan</button>
                 </div>
             </div>
         </nav>
 
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div id="dashboard-tab" class="tab-content">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-emerald-500 card-hover">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Total Penghuni</p>
-                                <p id="totalTenants" class="text-3xl font-bold text-gray-900 mt-2">0</p>
-                                <p class="text-xs text-emerald-600 font-medium mt-1">↗ Aktif</p>
-                            </div>
-                            <div class="bg-emerald-100 p-4 rounded-xl">
-                                <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                </svg>
-                            </div>
-                        </div>
+        <main class="max-w-7xl mx-auto px-4 py-6">
+            
+            <div id="dashboard-tab" class="tab-content fade-in">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                        <p class="text-xs text-gray-500 uppercase font-semibold">Total Penghuni</p>
+                        <p id="totalTenants" class="text-2xl font-bold text-gray-900 mt-1">0</p>
                     </div>
-
-                    <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-500 card-hover">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Tagihan Aktif</p>
-                                <p id="activeBills" class="text-3xl font-bold text-gray-900 mt-2">0</p>
-                                <p class="text-xs text-blue-600 font-medium mt-1">↗ Pending</p>
-                            </div>
-                            <div class="bg-blue-100 p-4 rounded-xl">
-                                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                            </div>
-                        </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                        <p class="text-xs text-gray-500 uppercase font-semibold">Tagihan Aktif</p>
+                        <p id="activeBills" class="text-2xl font-bold text-blue-600 mt-1">0</p>
                     </div>
-
-                    <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-amber-500 card-hover">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Jatuh Tempo</p>
-                                <p id="dueBills" class="text-3xl font-bold text-gray-900 mt-2">0</p>
-                                <p class="text-xs text-amber-600 font-medium mt-1">⚠ Segera</p>
-                            </div>
-                            <div class="bg-amber-100 p-4 rounded-xl">
-                                <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                        </div>
+                     <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                        <p class="text-xs text-gray-500 uppercase font-semibold">Jatuh Tempo</p>
+                        <p id="dueBills" class="text-2xl font-bold text-amber-500 mt-1">0</p>
                     </div>
-
-                    <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-red-500 card-hover">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Terlambat</p>
-                                <p id="overdueBills" class="text-3xl font-bold text-gray-900 mt-2">0</p>
-                                <p class="text-xs text-red-600 font-medium mt-1">⚡ Urgent</p>
-                            </div>
-                            <div class="bg-red-100 p-4 rounded-xl">
-                                <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                </svg>
-                            </div>
-                        </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                        <p class="text-xs text-gray-500 uppercase font-semibold">Pendapatan Bulan Ini</p>
+                        <p id="totalRevenue" class="text-2xl font-bold text-emerald-600 mt-1">Rp 0</p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                    <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-lg font-bold text-gray-900">Pendapatan Bulanan</h3>
-                            <div class="flex items-center space-x-2">
-                                <div class="w-3 h-3 bg-indigo-500 rounded-full"></div>
-                                <span class="text-sm text-gray-600">2024</span>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-gray-800 mb-4">Aktivitas Terbaru</h3>
+                        <div id="recentActivities" class="space-y-3 max-h-64 overflow-y-auto">
                             </div>
-                        </div>
-                        <div id="revenueChart" class="chart-container">
-                            <div class="flex items-end justify-between h-full space-x-2">
-                                <div class="flex flex-col items-center">
-                                    <div class="bg-indigo-500 rounded-t w-8 mb-2" style="height: 60%"></div>
-                                    <span class="text-xs text-gray-500">Jan</span>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="bg-indigo-500 rounded-t w-8 mb-2" style="height: 80%"></div>
-                                    <span class="text-xs text-gray-500">Feb</span>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="bg-indigo-500 rounded-t w-8 mb-2" style="height: 45%"></div>
-                                    <span class="text-xs text-gray-500">Mar</span>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="bg-indigo-500 rounded-t w-8 mb-2" style="height: 90%"></div>
-                                    <span class="text-xs text-gray-500">Apr</span>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="bg-indigo-500 rounded-t w-8 mb-2" style="height: 70%"></div>
-                                    <span class="text-xs text-gray-500">Mei</span>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <div class="bg-indigo-500 rounded-t w-8 mb-2" style="height: 85%"></div>
-                                    <span class="text-xs text-gray-500">Jun</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mt-4 text-center">
-                            <p class="text-2xl font-bold text-gray-900" id="totalRevenue">Rp 0</p>
-                            <p class="text-sm text-gray-600">Total Pendapatan Bulan Ini</p>
-                        </div>
                     </div>
-
-                    <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                        <h3 class="text-lg font-bold text-gray-900 mb-6">Aktivitas Terbaru</h3>
-                        <div id="recentActivities" class="space-y-4 max-h-80 overflow-y-auto">
-                            <div class="text-gray-500 text-center py-8">
-                                <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                </svg>
-                                <p class="font-medium">Belum ada aktivitas</p>
-                                <p class="text-sm">Aktivitas akan muncul di sini</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                    <h3 class="text-lg font-bold text-gray-900 mb-6">Aksi Cepat</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <button id="quickAddTenant" class="flex items-center justify-center p-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
-                            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
-                            </svg>
-                            Tambah Penghuni
-                        </button>
-                        <button id="quickAddBill" class="flex items-center justify-center p-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105">
-                            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                            Buat Tagihan
-                        </button>
-                        <button id="exportData" class="flex items-center justify-center p-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all duration-300 transform hover:scale-105">
-                            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            Export Data
-                        </button>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                         <h3 class="font-bold text-gray-800 mb-4">Aksi Cepat</h3>
+                         <div class="grid grid-cols-1 gap-3">
+                             <button id="quickAddTenant" class="w-full py-3 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 font-medium text-sm border border-indigo-200">Tambah Penghuni</button>
+                             <button id="quickAddBill" class="w-full py-3 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 font-medium text-sm border border-emerald-200">Buat Tagihan</button>
+                             <button id="refreshDataBtn" class="w-full py-3 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 font-medium text-sm border border-gray-200">Refresh Data Cloud</button>
+                             <button id="exportData" class="w-full py-3 bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 font-medium text-sm border border-amber-200">Backup Data (JSON)</button>
+                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="tenants-tab" class="tab-content hidden">
-                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-900">Daftar Penghuni</h3>
-                            <p class="text-gray-600 mt-1">Kelola data penghuni kost</p>
-                        </div>
-                        <div class="flex space-x-3">
-                            <div class="relative">
-                                <input type="text" id="searchTenants" placeholder="Cari penghuni..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                                <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                </svg>
-                            </div>
-                            <button id="addTenantBtn2" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                </svg>
-                                Tambah Penghuni
-                            </button>
-                        </div>
+            <div id="tenants-tab" class="tab-content hidden fade-in">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                        <h3 class="font-bold text-gray-700">Daftar Penghuni</h3>
+                        <input type="text" id="searchTenants" placeholder="Cari nama/kamar..." class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm w-64 focus:ring-2 focus:ring-indigo-500 outline-none">
                     </div>
-                    <div id="tenantsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div id="tenantsGrid" class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         </div>
                 </div>
             </div>
 
-            <div id="bills-tab" class="tab-content hidden">
-                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-900">Manajemen Tagihan</h3>
-                            <p class="text-gray-600 mt-1">Kelola tagihan dan pembayaran</p>
-                        </div>
-                        <div class="flex space-x-3">
-                            <select id="billFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <option value="all">Semua Status</option>
-                                <option value="pending">Pending</option>
-                                <option value="paid">Lunas</option>
-                                <option value="overdue">Terlambat</option>
-                            </select>
-                            <button id="addBillBtn" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                </svg>
-                                Buat Tagihan
-                            </button>
+            <div id="bills-tab" class="tab-content hidden fade-in">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                        <h3 class="font-bold text-gray-700">Daftar Tagihan</h3>
+                        <div class="flex gap-2">
+                             <select id="billFilter" class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm outline-none"><option value="all">Semua</option><option value="pending">Belum Bayar</option><option value="paid">Lunas</option></select>
+                             <button id="addBillBtn" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-emerald-700">Buat Tagihan</button>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-50 text-gray-600 font-medium border-b">
                                 <tr>
-                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Penghuni</th>
-                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Kamar</th>
-                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Jumlah</th>
-                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Jatuh Tempo</th>
-                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Aksi</th>
+                                    <th class="px-6 py-3">Penghuni</th>
+                                    <th class="px-6 py-3">Kamar</th>
+                                    <th class="px-6 py-3">Jumlah</th>
+                                    <th class="px-6 py-3">Jatuh Tempo</th>
+                                    <th class="px-6 py-3">Status</th>
+                                    <th class="px-6 py-3 text-right">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="billsTable" class="bg-white divide-y divide-gray-200">
-                                </tbody>
+                            <tbody id="billsTable" class="divide-y divide-gray-100"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <div id="reminders-tab" class="tab-content hidden">
-                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                    <div class="flex justify-between items-center mb-6">
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-900">Pengingat Tagihan</h3>
-                            <p class="text-gray-600 mt-1">Pantau tagihan yang perlu perhatian</p>
-                        </div>
-                        <button id="sendReminders" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                            </svg>
-                            Kirim Pengingat
-                        </button>
+            <div id="reminders-tab" class="tab-content hidden fade-in">
+                <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-sm border p-6">
+                    <div class="flex justify-between mb-6">
+                        <h3 class="font-bold text-lg">Pengingat Tagihan</h3>
+                        <button id="sendReminders" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Kirim WA (Simulasi)</button>
                     </div>
-                    <div id="remindersList" class="space-y-4">
-                        </div>
+                    <div id="remindersList" class="space-y-4"></div>
                 </div>
             </div>
 
-            <div id="reports-tab" class="tab-content hidden">
-                <div class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Pendapatan Bulan Ini</p>
-                                    <p id="monthlyRevenue" class="text-2xl font-bold text-gray-900 mt-2">Rp 0</p>
-                                </div>
-                                <div class="bg-green-100 p-3 rounded-xl">
-                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Tingkat Hunian</p>
-                                    <p id="occupancyRate" class="text-2xl font-bold text-gray-900 mt-2">0%</p>
-                                </div>
-                                <div class="bg-blue-100 p-3 rounded-xl">
-                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-600 uppercase tracking-wide">Rata-rata Tarif</p>
-                                    <p id="averageRate" class="text-2xl font-bold text-gray-900 mt-2">Rp 0</p>
-                                </div>
-                                <div class="bg-purple-100 p-3 rounded-xl">
-                                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
+            <div id="reports-tab" class="tab-content hidden fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border">
+                        <p class="text-gray-500 mb-2">Total Pendapatan (Bulan Ini)</p>
+                        <h2 id="monthlyRevenueReport" class="text-4xl font-bold text-indigo-600">Rp 0</h2>
                     </div>
-
-                    <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
-                        <h3 class="text-xl font-bold text-gray-900 mb-6">Laporan Detail</h3>
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                                <span class="font-medium text-gray-900">Total Penghuni Aktif</span>
-                                <span id="reportTotalTenants" class="font-bold text-indigo-600">0</span>
-                            </div>
-                            <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                                <span class="font-medium text-gray-900">Tagihan Terbayar Bulan Ini</span>
-                                <span id="reportPaidBills" class="font-bold text-green-600">0</span>
-                            </div>
-                            <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                                <span class="font-medium text-gray-900">Tagihan Tertunggak</span>
-                                <span id="reportOverdueBills" class="font-bold text-red-600">0</span>
-                            </div>
-                            <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                                <span class="font-medium text-gray-900">Pendapatan Total</span>
-                                <span id="reportTotalRevenue" class="font-bold text-purple-600">Rp 0</span>
-                            </div>
-                        </div>
+                     <div class="bg-white p-6 rounded-xl shadow-sm border">
+                        <p class="text-gray-500 mb-2">Tagihan Belum Lunas</p>
+                        <h2 id="reportOverdueBills" class="text-4xl font-bold text-red-500">0</h2>
                     </div>
                 </div>
             </div>
+
         </main>
 
-        <div id="tenantModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 max-h-full overflow-y-auto">
-                <div class="flex justify-between items-center p-6 border-b border-gray-200">
-                    <h3 class="text-xl font-bold text-gray-900">Tambah Penghuni Baru</h3>
-                    <button id="closeTenantModal" class="text-gray-400 hover:text-gray-600 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-                <form id="tenantForm" class="p-6">
-                    <div class="space-y-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Lengkap</label>
-                            <input type="text" id="tenantName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Masukkan nama lengkap" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nomor Kamar</label>
-                            <input type="text" id="roomNumber" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Contoh: A01, B12" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nomor Telepon</label>
-                            <input type="tel" id="phoneNumber" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="08xxxxxxxxxx" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Upload KTP</label>
-                            <div class="relative">
-                                <input type="file" id="ktpFile" accept="image/*,.pdf" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
-                                <p class="text-xs text-gray-500 mt-2">Format: JPG, PNG, atau PDF (Maks. 5MB). Akan disimpan di Google Drive melalui Apps Script.</p>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tarif Bulanan (Rp)</label>
-                            <input type="number" id="monthlyRate" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="1500000" required>
-                        </div>
+        <div id="tenantModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+            <div class="bg-white rounded-xl w-full max-w-md p-6 shadow-2xl">
+                <h3 class="font-bold text-lg mb-4">Tambah Penghuni</h3>
+                <form id="tenantForm" class="space-y-4">
+                    <input type="text" id="tenantName" placeholder="Nama Lengkap" class="w-full border p-2.5 rounded-lg" required>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" id="roomNumber" placeholder="No. Kamar" class="w-full border p-2.5 rounded-lg" required>
+                        <input type="number" id="monthlyRate" placeholder="Harga Sewa" class="w-full border p-2.5 rounded-lg" required>
                     </div>
-                    <div class="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
-                        <button type="button" id="cancelTenant" class="px-6 py-3 text-gray-600 hover:text-gray-800 font-semibold transition-colors">Batal</button>
-                        <button type="submit" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105">Simpan</button>
+                    <input type="tel" id="phoneNumber" placeholder="No. WhatsApp" class="w-full border p-2.5 rounded-lg" required>
+                    <div>
+                        <label class="text-sm text-gray-500 mb-1 block">Foto KTP (Opsional)</label>
+                        <input type="file" id="ktpFile" class="w-full text-sm border p-2 rounded-lg">
+                        <p class="text-xs text-gray-400 mt-1">*Hanya nama file yang disimpan di Cloud</p>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-4">
+                        <button type="button" id="cancelTenant" class="px-4 py-2 text-gray-500 font-medium">Batal</button>
+                        <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700">Simpan</button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <div id="billModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 max-h-full overflow-y-auto">
-                <div class="flex justify-between items-center p-6 border-b border-gray-200">
-                    <h3 class="text-xl font-bold text-gray-900">Buat Tagihan Baru</h3>
-                    <button id="closeBillModal" class="text-gray-400 hover:text-gray-600 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-                <form id="billForm" class="p-6">
-                    <div class="space-y-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Penghuni</label>
-                            <select id="billTenant" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" required>
-                                <option value="">Pilih penghuni...</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Jumlah Tagihan (Rp)</label>
-                            <input type="number" id="billAmount" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="1500000" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal Jatuh Tempo</label>
-                            <input type="date" id="dueDate" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Keterangan</label>
-                            <textarea id="billDescription" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" rows="3" placeholder="Tagihan kos bulan..."></textarea>
-                        </div>
-                    </div>
-                    <div class="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
-                        <button type="button" id="cancelBill" class="px-6 py-3 text-gray-600 hover:text-gray-800 font-semibold transition-colors">Batal</button>
-                        <button type="submit" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105">Buat Tagihan</button>
+        <div id="billModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+            <div class="bg-white rounded-xl w-full max-w-md p-6 shadow-2xl">
+                <h3 class="font-bold text-lg mb-4">Buat Tagihan</h3>
+                <form id="billForm" class="space-y-4">
+                    <select id="billTenant" class="w-full border p-2.5 rounded-lg" required><option value="">Pilih Penghuni...</option></select>
+                    <input type="number" id="billAmount" placeholder="Jumlah (Rp)" class="w-full border p-2.5 rounded-lg" required>
+                    <input type="date" id="dueDate" class="w-full border p-2.5 rounded-lg" required>
+                    <input type="text" id="billDescription" placeholder="Keterangan (cth: Sewa Mei 2024)" class="w-full border p-2.5 rounded-lg">
+                    <div class="flex justify-end gap-3 pt-4">
+                        <button type="button" id="cancelBill" class="px-4 py-2 text-gray-500 font-medium">Batal</button>
+                        <button type="submit" class="bg-emerald-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-emerald-700">Buat</button>
                     </div>
                 </form>
             </div>
         </div>
-
-        <div id="ktpModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-full overflow-y-auto">
-                <div class="flex justify-between items-center p-6 border-b border-gray-200">
-                    <h3 class="text-xl font-bold text-gray-900">Dokumen KTP</h3>
-                    <button id="closeKtpModal" class="text-gray-400 hover:text-gray-600 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-                <div id="ktpContent" class="p-6 text-center">
-                    </div>
-                <div class="flex justify-end space-x-3 p-6 border-t border-gray-200">
-                    <button id="downloadKtp" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 mr-3">
-                        Download
-                    </button>
-                    <button onclick="hideModal(document.getElementById('ktpModal'))" class="px-6 py-3 text-gray-600 hover:text-gray-800 font-semibold transition-colors">
-                        Tutup
-                    </button>
-                </div>
-            </div>
+        
+        <div id="ktpModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+             <div class="bg-white rounded-xl max-w-lg w-full p-6 text-center">
+                 <h3 class="font-bold text-lg mb-4">Dokumen KTP</h3>
+                 <div id="ktpContent" class="mb-4 bg-gray-100 rounded-lg p-4 flex items-center justify-center min-h-[150px]"></div>
+                 <button id="closeKtpModal" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-medium">Tutup</button>
+             </div>
         </div>
 
-        <div id="notification" class="fixed top-4 right-4 bg-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl hidden notification z-50 max-w-sm">
-            <div class="flex items-center">
-                <svg class="w-6 h-6 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                <span id="notificationText" class="font-medium">Berhasil!</span>
-            </div>
+        <div id="notification" class="fixed top-5 right-5 z-[100] hidden transform transition-all duration-300">
+             <div class="bg-emerald-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3">
+                 <span id="notifIcon">✅</span>
+                 <span id="notificationText" class="font-medium">Berhasil!</span>
+             </div>
         </div>
+
     </div>
 
     <script>
-        // =====================================================================
-        // KONFIGURASI PENTING (WAJIB DIGANTI)
-        // =====================================================================
-        
-        // PASTE URL WEB APP APPS SCRIPT ANDA DI BAWAH INI
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJfEXYk0BwVXcGBb8PAJoroSiC_h-IfMqTpuyfDfrZygyj0RY3W0sByMDUyJGJE2VG/exec'; 
-        // Contoh: 'https://script.google.com/macros/s/AKfycbyJ9V_r.../exec'
-        
-        // =====================================================================
-        // DATA STORAGE (Sekarang diurus oleh Apps Script)
-        // =====================================================================
+        // ==========================================
+        // ⚠️ PASTE URL APPS SCRIPT ANDA DI SINI ⚠️
+        // ==========================================
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIyaS2t-CXJbBSh4nG_XlivEjQuFTmC4KiC04c22LgarpjfOaiRNLKHc1lFUSZBSoF/exec"; 
+        // Contoh: "https://script.google.com/macros/s/AKfycbx.../exec"
+        // ==========================================
 
-        let tenants = []; // Data Penghuni dari Apps Script
-        let bills = [];   // Data Tagihan dari Apps Script
-        let activities = []; // Data Aktivitas dari Apps Script
-        
-        // =====================================================================
-        // API HELPER FUNCTION
-        // =====================================================================
+        let tenants = [], bills = [], activities = [];
 
-        /**
-         * Fungsi helper untuk melakukan panggilan POST ke Google Apps Script API.
-         * @param {object} data Objek data yang berisi 'action' dan parameter lainnya.
-         */
-        async function callApi(data) {
-            if (SCRIPT_URL.includes('PASTE_URL')) {
-                 showNotification('Error: Harap ganti SCRIPT_URL di dalam tag <script> dengan URL Web App Anda.', 'error');
-                 throw new Error("SCRIPT_URL not configured.");
-            }
+        // --- Helpers ---
+        const showLoading = (msg) => {
+            document.getElementById('loadingText').innerText = msg;
+            document.getElementById('globalLoading').style.display = 'flex';
+        }
+        const hideLoading = () => {
+            document.getElementById('globalLoading').style.display = 'none';
+        }
+        const showNotif = (msg, type = 'success') => {
+            const el = document.getElementById('notification');
+            const txt = document.getElementById('notificationText');
+            const icon = document.getElementById('notifIcon');
+            const box = el.firstElementChild;
             
-            const formData = new FormData();
-            for (const key in data) {
-                // Konversi objek ktpFile/logo menjadi string JSON agar bisa ditransfer
-                if ((key === 'ktpFile' || key === 'logoData') && data[key] !== null && typeof data[key] === 'object') {
-                    formData.append(key, JSON.stringify(data[key]));
-                } else if (data[key] !== null && data[key] !== undefined) {
-                    formData.append(key, data[key]);
-                }
-            }
+            txt.innerText = msg;
+            icon.innerText = type === 'error' ? '❌' : '✅';
+            box.className = `px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 text-white ${type === 'error' ? 'bg-red-500' : 'bg-emerald-600'}`;
             
-            // Konversi FormData ke URLSearchParams untuk fetch (Apps Script lebih suka ini)
-            const urlParams = new URLSearchParams(formData);
+            el.classList.remove('hidden', 'translate-y-[-20px]', 'opacity-0');
+            setTimeout(() => el.classList.add('hidden'), 3000);
+        }
 
+        // --- Cloud Functions ---
+        async function fetchCloudData() {
+            if(APPS_SCRIPT_URL.includes("MASUKKAN_URL")) {
+                showNotif("URL Script belum diisi di kode HTML!", "error");
+                return;
+            }
+            showLoading("Sinkronisasi Data...");
             try {
-                const response = await fetch(SCRIPT_URL, {
+                const res = await fetch(`${APPS_SCRIPT_URL}?action=read`);
+                const json = await res.json();
+                if(json.status === 'success') {
+                    tenants = json.data.tenants || [];
+                    bills = json.data.bills || [];
+                    activities = json.data.activities || [];
+                    refreshUI();
+                    showNotif("Data berhasil dimuat");
+                } else {
+                    showNotif("Gagal: " + json.message, "error");
+                }
+            } catch (e) {
+                console.error(e);
+                showNotif("Gagal koneksi internet", "error");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function saveToCloud() {
+            showLoading("Menyimpan...");
+            try {
+                // Gunakan text/plain untuk bypass preflight CORS di beberapa browser
+                await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'cors',
-                    body: urlParams
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ tenants, bills, activities })
                 });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const jsonResponse = await response.json();
-                
-                if (!jsonResponse.success) {
-                    throw new Error(jsonResponse.error || "Operation failed on server side.");
-                }
-                
-                return jsonResponse.data;
-
-            } catch (error) {
-                console.error("API Call Error:", error);
-                showNotification(`Gagal terhubung ke server: ${error.message}`, 'error');
-                throw error;
-            }
-        }
-        
-        /**
-         * Memuat semua data awal (Tenants, Bills, Activities, Logo) dari Apps Script.
-         */
-        async function loadInitialData() {
-            showNotification('Memuat data dari Google Sheet...', 'info');
-            try {
-                const data = await callApi({ action: 'loadData' });
-                
-                // Simpan data ke variabel global
-                tenants = data.tenants || [];
-                bills = data.bills || [];
-                activities = data.activities || [];
-                
-                // Muat logo dari API
-                const logoData = await callApi({ action: 'loadLogo' });
-                if(logoData.logoData) {
-                    displayLogo(JSON.parse(logoData.logoData));
-                }
-                
-                // Lanjutkan dengan rendering
-                updateDashboard();
-                renderTenants();
-                renderBills();
-                renderReminders();
-                renderReports();
-                updateBillTenantSelect();
-
-                showNotification('Data berhasil dimuat!', 'success');
-
-            } catch (error) {
-                console.error("Failed to load initial data:", error);
-                showNotification('Gagal memuat data awal. Cek URL Web App Anda dan pastikan Apps Script sudah di Deploy.', 'error');
+                showNotif("Tersimpan di Cloud!");
+            } catch (e) {
+                console.error(e);
+                showNotif("Gagal menyimpan (Cek internet)", "error");
+            } finally {
+                hideLoading();
             }
         }
 
-
-        // DOM elements
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const tenantModal = document.getElementById('tenantModal');
-        const billModal = document.getElementById('billModal');
-        const ktpModal = document.getElementById('ktpModal');
-        const notification = document.getElementById('notification');
-
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', async function() {
-            await loadInitialData(); // Panggil fungsi pemuatan data dari Apps Script
-            
-            // Set default due date to next month
-            const nextMonth = new Date();
-            nextMonth.setMonth(nextMonth.getMonth() + 1);
-            document.getElementById('dueDate').value = nextMonth.toISOString().split('T')[0];
-
-            // Initialize search functionality
-            document.getElementById('searchTenants').addEventListener('input', filterTenants);
-            document.getElementById('billFilter').addEventListener('change', filterBills);
-            
-            // Initialize logo upload functionality
-            document.getElementById('logoUpload').addEventListener('change', handleLogoUpload);
-            document.getElementById('removeLogo').addEventListener('click', removeLogo);
-        });
-
-        // Tab switching
-        tabBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const tabName = btn.dataset.tab;
-                
-                // Update active tab button
-                tabBtns.forEach(b => {
-                    b.classList.remove('active', 'border-indigo-500', 'text-indigo-600');
-                    b.classList.add('border-transparent', 'text-gray-500');
-                });
-                btn.classList.add('active', 'border-indigo-500', 'text-indigo-600');
-                btn.classList.remove('border-transparent', 'text-gray-500');
-                
-                // Show active tab content
-                tabContents.forEach(content => {
-                    content.classList.add('hidden');
-                });
-                document.getElementById(tabName + '-tab').classList.remove('hidden');
-                document.getElementById(tabName + '-tab').classList.add('fade-in');
-
-                // Update reports when reports tab is clicked
-                if (tabName === 'reports') {
-                    renderReports();
-                }
-            });
-        });
-
-        // Modal handlers
-        document.getElementById('addTenantBtn').addEventListener('click', () => showModal(tenantModal));
-        document.getElementById('addTenantBtn2').addEventListener('click', () => showModal(tenantModal));
-        document.getElementById('quickAddTenant').addEventListener('click', () => showModal(tenantModal));
-        document.getElementById('addBillBtn').addEventListener('click', () => showModal(billModal));
-        document.getElementById('quickAddBill').addEventListener('click', () => showModal(billModal));
-        document.getElementById('closeTenantModal').addEventListener('click', () => hideModal(tenantModal));
-        document.getElementById('closeBillModal').addEventListener('click', () => hideModal(billModal));
-        document.getElementById('closeKtpModal').addEventListener('click', () => hideModal(ktpModal));
-        document.getElementById('cancelTenant').addEventListener('click', () => hideModal(tenantModal));
-        document.getElementById('cancelBill').addEventListener('click', () => hideModal(billModal));
-
-        // Quick actions
-        document.getElementById('exportData').addEventListener('click', () => showNotification('Fungsi Export Data (Lokal) Dinonaktifkan. Data disimpan di Google Sheet.', 'warning'));
-        document.getElementById('sendReminders').addEventListener('click', sendReminders);
-
-        // Form handlers
-        document.getElementById('tenantForm').addEventListener('submit', handleTenantSubmit);
-        document.getElementById('billForm').addEventListener('submit', handleBillSubmit);
-
-        function showModal(modal) {
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function hideModal(modal) {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            document.body.style.overflow = 'auto';
-        }
-
-        function showNotification(message, type = 'success') {
-            const notificationEl = document.getElementById('notification');
-            const textEl = document.getElementById('notificationText');
-            
-            textEl.textContent = message;
-            
-            // Update notification style based on type
-            const baseClasses = 'fixed top-4 right-4 px-6 py-4 rounded-xl shadow-2xl notification z-50 max-w-sm text-white font-medium';
-            const typeClasses = {
-                success: 'bg-emerald-500',
-                error: 'bg-red-500',
-                warning: 'bg-amber-500',
-                info: 'bg-blue-500'
-            };
-            
-            notificationEl.className = `${baseClasses} ${typeClasses[type] || typeClasses.success}`;
-            notificationEl.classList.remove('hidden');
-            
-            setTimeout(() => {
-                notificationEl.classList.add('hidden');
-            }, 4000);
-        }
-
-        async function handleTenantSubmit(e) {
-            e.preventDefault();
-            
-            const ktpFile = document.getElementById('ktpFile').files[0];
-            
-            // 1. Validasi file size (5MB max)
-            if (ktpFile && ktpFile.size > 5 * 1024 * 1024) {
-                showNotification('Ukuran file KTP terlalu besar. Maksimal 5MB.', 'error');
-                return;
-            }
-            
-            // 2. Convert file to base64 for transfer/storage
-            if (ktpFile) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const ktpData = {
-                        name: ktpFile.name,
-                        type: ktpFile.type,
-                        size: ktpFile.size,
-                        data: e.target.result // Base64 string
-                    };
-                    
-                    saveTenant(ktpData);
-                };
-                reader.readAsDataURL(ktpFile);
-            } else {
-                saveTenant(null);
-            }
-        }
-        
-        async function saveTenant(ktpData) {
-            const tenantPayload = {
-                action: 'addTenant',
-                name: document.getElementById('tenantName').value,
-                room: document.getElementById('roomNumber').value,
-                phone: document.getElementById('phoneNumber').value,
-                monthlyRate: parseInt(document.getElementById('monthlyRate').value),
-                joinDate: new Date().toISOString().split('T')[0],
-                ktpFile: ktpData
-            };
-            
-            try {
-                await callApi(tenantPayload);
-
-                document.getElementById('tenantForm').reset();
-                hideModal(tenantModal);
-                showNotification('Penghuni berhasil ditambahkan!', 'success');
-                
-                // Muat ulang semua data setelah berhasil
-                await loadInitialData(); 
-                
-            } catch (error) {
-                // Notifikasi error sudah ditangani di callApi
-            }
-        }
-
-        async function handleBillSubmit(e) {
-            e.preventDefault();
-            
-            const tenantId = parseInt(document.getElementById('billTenant').value);
-            const tenant = tenants.find(t => t.id === tenantId);
-            
-            if (!tenant) {
-                showNotification('Pilih penghuni yang valid!', 'error');
-                return;
-            }
-            
-            const billPayload = {
-                action: 'addBill',
-                tenantId: tenantId,
-                tenantName: tenant.name,
-                room: tenant.room,
-                amount: parseInt(document.getElementById('billAmount').value),
-                dueDate: document.getElementById('dueDate').value,
-                description: document.getElementById('billDescription').value || `Tagihan kos bulan ${new Date().toLocaleDateString('id-ID', {month: 'long', year: 'numeric'})}`,
-                status: 'pending',
-                createdDate: new Date().toISOString().split('T')[0]
-            };
-            
-            try {
-                await callApi(billPayload);
-                
-                document.getElementById('billForm').reset();
-                hideModal(billModal);
-                showNotification('Tagihan berhasil dibuat!', 'success');
-                
-                // Muat ulang semua data setelah berhasil
-                await loadInitialData();
-                
-            } catch (error) {
-                // Notifikasi error sudah ditangani di callApi
-            }
-        }
-
-        async function addActivity(message) {
-            try {
-                // Kirim log aktivitas ke Apps Script
-                await callApi({ action: 'addActivity', message: message });
-                
-                // Tidak perlu loadInitialData, cukup render aktivitas
-                // Note: Pada implementasi Apps Script, Apps Script sudah mengurus log.
-                // Kita akan refresh aktivitas pada loadInitialData atau saat rendering.
-                
-            } catch (error) {
-                console.error('Failed to log activity:', error);
-            }
-        }
-
-        function updateDashboard() {
-            document.getElementById('totalTenants').textContent = tenants.length;
-            document.getElementById('activeBills').textContent = bills.filter(b => b.status === 'pending').length;
-            
+        // --- UI Rendering ---
+        function refreshUI() {
+            // Dashboard
+            document.getElementById('totalTenants').innerText = tenants.length;
+            document.getElementById('activeBills').innerText = bills.filter(b => b.status === 'pending').length;
             const today = new Date().toISOString().split('T')[0];
-            const dueBills = bills.filter(b => b.status === 'pending' && b.dueDate >= today).length;
-            const overdueBills = bills.filter(b => b.status === 'pending' && b.dueDate < today).length;
+            document.getElementById('dueBills').innerText = bills.filter(b => b.status === 'pending' && b.dueDate <= today).length;
             
-            document.getElementById('dueBills').textContent = dueBills;
-            document.getElementById('overdueBills').textContent = overdueBills;
-            
-            // Calculate total revenue
-            const currentMonth = new Date().toISOString().slice(0, 7);
-            const monthlyRevenue = bills
-                .filter(b => b.status === 'paid' && b.paidDate && b.paidDate.startsWith(currentMonth))
-                .reduce((sum, bill) => sum + bill.amount, 0);
-            
-            document.getElementById('totalRevenue').textContent = `Rp ${monthlyRevenue.toLocaleString('id-ID')}`;
-            
-            renderActivities();
-        }
+            const month = new Date().toISOString().slice(0, 7);
+            const rev = bills.filter(b => b.status === 'paid' && b.paidDate && b.paidDate.startsWith(month))
+                             .reduce((a, b) => a + b.amount, 0);
+            document.getElementById('totalRevenue').innerText = `Rp ${rev.toLocaleString('id-ID')}`;
+            document.getElementById('monthlyRevenueReport').innerText = `Rp ${rev.toLocaleString('id-ID')}`;
+            document.getElementById('reportOverdueBills').innerText = bills.filter(b => b.status === 'pending').length;
 
-        function renderActivities() {
-            const container = document.getElementById('recentActivities');
-            
-            if (activities.length === 0) {
-                container.innerHTML = `
-                    <div class="text-gray-500 text-center py-8">
-                        <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                        </svg>
-                        <p class="font-medium">Belum ada aktivitas</p>
-                        <p class="text-sm">Aktivitas akan muncul di sini</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = activities.slice(0, 10).map(activity => `
-                <div class="flex items-start space-x-3 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl hover:from-indigo-50 hover:to-purple-50 transition-all duration-300">
-                    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-2 rounded-full flex-shrink-0">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-gray-900">${activity.message}</p>
-                        <p class="text-xs text-gray-500 mt-1">${new Date(activity.date).toLocaleString('id-ID')}</p>
-                    </div>
-                </div>
-            `).join('');
+            renderTenants();
+            renderBills();
+            renderActivities();
+            updateSelect();
         }
 
         function renderTenants() {
-            const container = document.getElementById('tenantsGrid');
+            const search = document.getElementById('searchTenants').value.toLowerCase();
+            const filtered = tenants.filter(t => t.name.toLowerCase().includes(search) || t.room.toLowerCase().includes(search));
+            const grid = document.getElementById('tenantsGrid');
             
-            if (tenants.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full text-center py-12">
-                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                        </svg>
-                        <p class="text-lg font-medium text-gray-900 mb-2">Belum ada penghuni terdaftar</p>
-                        <p class="text-gray-600">Tambahkan penghuni pertama untuk memulai</p>
-                    </div>
-                `;
-                return;
-            }
+            if(!filtered.length) { grid.innerHTML = '<p class="col-span-full text-center text-gray-400 py-10">Tidak ada data penghuni.</p>'; return; }
             
-            container.innerHTML = tenants.map(tenant => `
-                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 card-hover transition-all duration-300">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-3 rounded-xl">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                        </div>
-                        <span class="bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full">Kamar ${tenant.room}</span>
-                    </div>
-                    <h4 class="text-lg font-bold text-gray-900 mb-3">${tenant.name}</h4>
-                    <div class="space-y-3 text-sm text-gray-600">
-                        <div class="flex items-center">
-                            <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                            </svg>
-                            <span class="font-medium">${tenant.phone}</span>
-                        </div>
-                        <div class="flex items-center">
-                            <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                            </svg>
-                            <span class="font-bold text-emerald-600">Rp ${tenant.monthlyRate.toLocaleString('id-ID')}/bulan</span>
-                        </div>
-                        <div class="flex items-center">
-                            <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            <span>Bergabung: ${new Date(tenant.joinDate).toLocaleDateString('id-ID')}</span>
+            grid.innerHTML = filtered.map(t => `
+                <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 card-hover relative group">
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="bg-indigo-50 text-indigo-700 font-bold px-2.5 py-1 rounded text-xs">Kamar ${t.room}</span>
+                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="deleteTenant(${t.id})" class="text-red-500 text-xs hover:underline">Hapus</button>
                         </div>
                     </div>
-                    <div class="mt-6 flex space-x-2">
-                        ${tenant.ktpFile ? `
-                            <button onclick="viewKTP(${tenant.id})" class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105">
-                                Lihat KTP
-                            </button>
-                        ` : ''}
-                        <button onclick="deleteTenant(${tenant.id})" class="flex-1 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105">
-                            Hapus
-                        </button>
+                    <h4 class="font-bold text-gray-800 text-lg mb-1">${t.name}</h4>
+                    <p class="text-sm text-gray-500 mb-3">${t.phone}</p>
+                    <p class="text-emerald-600 font-bold text-sm">Rp ${t.monthlyRate.toLocaleString('id-ID')}/bln</p>
+                    <div class="mt-4 pt-3 border-t border-gray-50">
+                        ${t.ktpFile ? `<button onclick="viewKTP(${t.id})" class="text-xs text-blue-600 font-medium hover:underline flex items-center gap-1">📄 Lihat KTP</button>` : '<span class="text-xs text-gray-400">Tidak ada KTP</span>'}
                     </div>
                 </div>
             `).join('');
         }
 
         function renderBills() {
-            const container = document.getElementById('billsTable');
-            
-            if (bills.length === 0) {
-                container.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="px-6 py-12 text-center">
-                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            <p class="text-lg font-medium text-gray-900 mb-2">Belum ada tagihan</p>
-                            <p class="text-gray-600">Buat tagihan pertama untuk memulai</p>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            container.innerHTML = bills.map(bill => {
-                const isOverdue = bill.status === 'pending' && bill.dueDate < new Date().toISOString().split('T')[0];
-                const statusConfig = {
-                    paid: { class: 'bg-emerald-100 text-emerald-800 status-badge', text: 'Lunas', icon: '✓' },
-                    pending: { class: 'bg-amber-100 text-amber-800 status-badge', text: 'Pending', icon: '⏳' },
-                    overdue: { class: 'bg-red-100 text-red-800 status-badge', text: 'Terlambat', icon: '⚠' }
-                };
-                
-                const status = bill.status === 'paid' ? 'paid' : (isOverdue ? 'overdue' : 'pending');
-                const config = statusConfig[status];
-                
-                // Cari data kamar dari tenant
-                const tenant = tenants.find(t => t.id === bill.tenantId);
-                const roomNumber = tenant ? tenant.room : 'N/A';
+            const filter = document.getElementById('billFilter').value;
+            const today = new Date().toISOString().split('T')[0];
+            let list = bills;
+            if(filter === 'pending') list = bills.filter(b => b.status === 'pending');
+            if(filter === 'paid') list = bills.filter(b => b.status === 'paid');
+
+            const tbody = document.getElementById('billsTable');
+            if(!list.length) { tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-400">Tidak ada tagihan.</td></tr>'; return; }
+
+            tbody.innerHTML = list.map(b => {
+                const isLate = b.status === 'pending' && b.dueDate < today;
+                const statusHtml = b.status === 'paid' 
+                    ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold">LUNAS</span>'
+                    : (isLate ? '<span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">TERLAMBAT</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-xs font-bold">PENDING</span>');
                 
                 return `
-                    <tr class="hover:bg-gray-50 transition-colors duration-200">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-bold text-gray-900">${bill.tenantName}</div>
-                            <div class="text-sm text-gray-500">${bill.description}</div>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                            <div class="font-medium text-gray-900">${b.tenantName}</div>
+                            <div class="text-xs text-gray-500">${b.description}</div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                                ${roomNumber}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">Rp ${bill.amount.toLocaleString('id-ID')}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(bill.dueDate).toLocaleDateString('id-ID')}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-3 py-1 text-xs font-bold rounded-full ${config.class}">
-                                <span class="mr-1">${config.icon}</span>
-                                ${config.text}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                            ${bill.status === 'pending' ? `
-                                <button onclick="markAsPaid(${bill.id})" class="text-emerald-600 hover:text-emerald-900 font-semibold transition-colors">Tandai Lunas</button>
-                            ` : `
-                                <button onclick="printInvoice(${bill.id})" class="text-blue-600 hover:text-blue-900 font-semibold transition-colors flex items-center">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 001-1V9a2 2 0 00-1-1H9a2 2 0 00-1 1v11a2 2 0 001 1z"></path>
-                                    </svg>
-                                    Cetak
-                                </button>
-                            `}
-                            <button onclick="deleteBill(${bill.id})" class="text-red-600 hover:text-red-900 font-semibold transition-colors">Hapus</button>
+                        <td class="px-6 py-4">${b.room}</td>
+                        <td class="px-6 py-4 font-bold text-gray-700">Rp ${b.amount.toLocaleString('id-ID')}</td>
+                        <td class="px-6 py-4 text-xs text-gray-500">${b.dueDate}</td>
+                        <td class="px-6 py-4">${statusHtml}</td>
+                        <td class="px-6 py-4 text-right space-x-2">
+                            ${b.status === 'pending' 
+                                ? `<button onclick="markAsPaid(${b.id})" class="text-emerald-600 font-bold text-xs hover:underline">Bayar</button>`
+                                : `<button onclick="printInvoice(${b.id})" class="text-blue-600 font-bold text-xs hover:underline">Cetak</button>`
+                            }
+                            <button onclick="deleteBill(${b.id})" class="text-red-500 text-xs hover:underline">Hapus</button>
                         </td>
                     </tr>
                 `;
             }).join('');
-        }
 
-        function renderReminders() {
-            const container = document.getElementById('remindersList');
-            const pendingBills = bills.filter(b => b.status === 'pending');
-            
-            if (pendingBills.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-12">
-                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <p class="text-lg font-medium text-gray-900 mb-2">Tidak ada pengingat tagihan</p>
-                        <p class="text-gray-600">Semua tagihan sudah terbayar</p>
+            // Update Reminders
+            const pending = bills.filter(b => b.status === 'pending');
+            const remList = document.getElementById('remindersList');
+            remList.innerHTML = pending.length ? pending.map(b => `
+                <div class="flex justify-between items-center p-3 bg-blue-50 border border-blue-100 rounded-lg">
+                    <div>
+                        <p class="font-bold text-gray-800 text-sm">${b.tenantName} (${b.room})</p>
+                        <p class="text-xs text-red-500 font-medium">Jatuh Tempo: ${b.dueDate}</p>
                     </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = pendingBills.map(bill => {
-                const dueDate = new Date(bill.dueDate);
-                const daysDiff = Math.ceil((dueDate - new Date()) / (1000 * 60 * 60 * 24));
-                const isOverdue = daysDiff < 0;
-                const isDueSoon = daysDiff <= 3 && daysDiff >= 0;
-                
-                // Cari data kamar dari tenant
-                const tenant = tenants.find(t => t.id === bill.tenantId);
-                const roomNumber = tenant ? tenant.room : 'N/A';
-                
-                let alertConfig = {
-                    class: 'bg-blue-50 border-blue-200',
-                    iconClass: 'text-blue-600',
-                    message: `Tagihan jatuh tempo dalam ${daysDiff} hari`,
-                    priority: 'info'
-                };
-                
-                if (isOverdue) {
-                    alertConfig = {
-                        class: 'bg-red-50 border-red-200',
-                        iconClass: 'text-red-600',
-                        message: `Tagihan terlambat ${Math.abs(daysDiff)} hari`,
-                        priority: 'urgent'
-                    };
-                } else if (isDueSoon) {
-                    alertConfig = {
-                        class: 'bg-amber-50 border-amber-200',
-                        iconClass: 'text-amber-600',
-                        message: daysDiff === 0 ? 'Tagihan jatuh tempo hari ini' : `Tagihan jatuh tempo dalam ${daysDiff} hari`,
-                        priority: 'warning'
-                    };
-                }
-                
-                return `
-                    <div class="border-2 rounded-xl p-6 ${alertConfig.class} card-hover">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <svg class="w-6 h-6 ${alertConfig.iconClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                </svg>
-                            </div>
-                            <div class="ml-4 flex-1">
-                                <div class="flex items-center justify-between mb-2">
-                                    <h4 class="text-lg font-bold text-gray-900">${bill.tenantName} - Kamar ${roomNumber}</h4>
-                                    <span class="text-xs font-bold px-2 py-1 rounded-full ${alertConfig.priority === 'urgent' ? 'bg-red-200 text-red-800' : alertConfig.priority === 'warning' ? 'bg-amber-200 text-amber-800' : 'bg-blue-200 text-blue-800'}">${alertConfig.priority.toUpperCase()}</span>
-                                </div>
-                                <p class="text-sm font-semibold text-gray-700 mb-2">${alertConfig.message}</p>
-                                <div class="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
-                                    <div>
-                                        <span class="font-medium">Jumlah:</span>
-                                        <span class="font-bold text-gray-900 ml-1">Rp ${bill.amount.toLocaleString('id-ID')}</span>
-                                    </div>
-                                    <div>
-                                        <span class="font-medium">Jatuh tempo:</span>
-                                        <span class="font-bold text-gray-900 ml-1">${new Date(bill.dueDate).toLocaleDateString('id-ID')}</span>
-                                    </div>
-                                </div>
-                                <div class="flex space-x-3">
-                                    <button onclick="markAsPaid(${bill.id})" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105">
-                                        Tandai Lunas
-                                    </button>
-                                    <button onclick="sendReminderToTenant(${bill.id})" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105">
-                                        Kirim Pengingat
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function renderReports() {
-            // Calculate monthly revenue
-            const currentMonth = new Date().toISOString().slice(0, 7);
-            const monthlyRevenue = bills
-                .filter(b => b.status === 'paid' && b.paidDate && b.paidDate.startsWith(currentMonth))
-                .reduce((sum, bill) => sum + bill.amount, 0);
-            
-            // Calculate occupancy rate (assuming 50 total rooms)
-            const totalRooms = 50;
-            const occupancyRate = tenants.length > 0 ? Math.round((tenants.length / totalRooms) * 100) : 0;
-            
-            // Calculate average rate
-            const averageRate = tenants.length > 0 ? 
-                Math.round(tenants.reduce((sum, tenant) => sum + tenant.monthlyRate, 0) / tenants.length) : 0;
-            
-            // Calculate total revenue
-            const totalRevenue = bills
-                .filter(b => b.status === 'paid')
-                .reduce((sum, bill) => sum + bill.amount, 0);
-            
-            // Update report elements
-            document.getElementById('monthlyRevenue').textContent = `Rp ${monthlyRevenue.toLocaleString('id-ID')}`;
-            document.getElementById('occupancyRate').textContent = `${occupancyRate}%`;
-            document.getElementById('averageRate').textContent = `Rp ${averageRate.toLocaleString('id-ID')}`;
-            
-            document.getElementById('reportTotalTenants').textContent = tenants.length;
-            document.getElementById('reportPaidBills').textContent = bills.filter(b => b.status === 'paid' && b.paidDate && b.paidDate.startsWith(currentMonth)).length;
-            document.getElementById('reportOverdueBills').textContent = bills.filter(b => b.status === 'pending' && b.dueDate < new Date().toISOString().split('T')[0]).length;
-            document.getElementById('reportTotalRevenue').textContent = `Rp ${totalRevenue.toLocaleString('id-ID')}`;
-        }
-
-        function updateBillTenantSelect() {
-            const select = document.getElementById('billTenant');
-            select.innerHTML = '<option value="">Pilih penghuni...</option>' + 
-                tenants.map(tenant => `<option value="${tenant.id}">${tenant.name} - Kamar ${tenant.room}</option>`).join('');
-            
-            // Auto-fill amount when tenant is selected
-            select.addEventListener('change', function() {
-                const tenantId = parseInt(this.value);
-                const tenant = tenants.find(t => t.id === tenantId);
-                if (tenant) {
-                    document.getElementById('billAmount').value = tenant.monthlyRate;
-                }
-            });
-        }
-
-        function filterTenants() {
-            const searchTerm = document.getElementById('searchTenants').value.toLowerCase();
-            const filteredTenants = tenants.filter(tenant => 
-                tenant.name.toLowerCase().includes(searchTerm) ||
-                tenant.room.toLowerCase().includes(searchTerm) ||
-                tenant.phone.includes(searchTerm)
-            );
-            
-            // Re-render with filtered data
-            const container = document.getElementById('tenantsGrid');
-            if (filteredTenants.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full text-center py-12">
-                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        <p class="text-lg font-medium text-gray-900 mb-2">Tidak ada hasil pencarian</p>
-                        <p class="text-gray-600">Coba kata kunci yang berbeda</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Use the same rendering logic but with filtered data
-            container.innerHTML = filteredTenants.map(tenant => `
-                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 card-hover transition-all duration-300">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-3 rounded-xl">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                        </div>
-                        <span class="bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full">Kamar ${tenant.room}</span>
-                    </div>
-                    <h4 class="text-lg font-bold text-gray-900 mb-3">${tenant.name}</h4>
-                    <div class="space-y-3 text-sm text-gray-600">
-                        <div class="flex items-center">
-                            <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                            </svg>
-                            <span class="font-medium">${tenant.phone}</span>
-                        </div>
-                        <div class="flex items-center">
-                            <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                            </svg>
-                            <span class="font-bold text-emerald-600">Rp ${tenant.monthlyRate.toLocaleString('id-ID')}/bulan</span>
-                        </div>
-                        <div class="flex items-center">
-                            <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            <span>Bergabung: ${new Date(tenant.joinDate).toLocaleDateString('id-ID')}</span>
-                        </div>
-                    </div>
-                    <div class="mt-6 flex space-x-2">
-                        ${tenant.ktpFile ? `
-                            <button onclick="viewKTP(${tenant.id})" class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105">
-                                Lihat KTP
-                            </button>
-                        ` : ''}
-                        <button onclick="deleteTenant(${tenant.id})" class="flex-1 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105">
-                            Hapus
-                        </button>
+                    <div class="text-right">
+                        <p class="font-bold text-gray-700 text-sm">Rp ${b.amount.toLocaleString('id-ID')}</p>
                     </div>
                 </div>
-            `).join('');
+            `).join('') : '<p class="text-center text-gray-400 py-4">Semua tagihan lunas.</p>';
         }
 
-        function filterBills() {
-            const filterValue = document.getElementById('billFilter').value;
-            const today = new Date().toISOString().split('T')[0];
-            
-            let filteredBills = bills;
-            
-            if (filterValue === 'pending') {
-                filteredBills = bills.filter(b => b.status === 'pending' && b.dueDate >= today);
-            } else if (filterValue === 'paid') {
-                filteredBills = bills.filter(b => b.status === 'paid');
-            } else if (filterValue === 'overdue') {
-                filteredBills = bills.filter(b => b.status === 'pending' && b.dueDate < today);
-            }
-            
-            // Re-render table with filtered data
-            const container = document.getElementById('billsTable');
-            
-            if (filteredBills.length === 0) {
-                container.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="px-6 py-12 text-center">
-                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            <p class="text-lg font-medium text-gray-900 mb-2">Tidak ada tagihan dengan filter ini</p>
-                            <p class="text-gray-600">Coba filter yang berbeda</p>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            container.innerHTML = filteredBills.map(bill => {
-                const isOverdue = bill.status === 'pending' && bill.dueDate < today;
-                const statusConfig = {
-                    paid: { class: 'bg-emerald-100 text-emerald-800 status-badge', text: 'Lunas', icon: '✓' },
-                    pending: { class: 'bg-amber-100 text-amber-800 status-badge', text: 'Pending', icon: '⏳' },
-                    overdue: { class: 'bg-red-100 text-red-800 status-badge', text: 'Terlambat', icon: '⚠' }
-                };
-                
-                const status = bill.status === 'paid' ? 'paid' : (isOverdue ? 'overdue' : 'pending');
-                const config = statusConfig[status];
-                
-                // Cari data kamar dari tenant
-                const tenant = tenants.find(t => t.id === bill.tenantId);
-                const roomNumber = tenant ? tenant.room : 'N/A';
-                
-                return `
-                    <tr class="hover:bg-gray-50 transition-colors duration-200">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-bold text-gray-900">${bill.tenantName}</div>
-                            <div class="text-sm text-gray-500">${bill.description}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                                ${roomNumber}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">Rp ${bill.amount.toLocaleString('id-ID')}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(bill.dueDate).toLocaleDateString('id-ID')}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-3 py-1 text-xs font-bold rounded-full ${config.class}">
-                                <span class="mr-1">${config.icon}</span>
-                                ${config.text}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                            ${bill.status === 'pending' ? `
-                                <button onclick="markAsPaid(${bill.id})" class="text-emerald-600 hover:text-emerald-900 font-semibold transition-colors">Tandai Lunas</button>
-                            ` : `
-                                <button onclick="printInvoice(${bill.id})" class="text-blue-600 hover:text-blue-900 font-semibold transition-colors flex items-center">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 001-1V9a2 2 0 00-1-1H9a2 2 0 00-1 1v11a2 2 0 001 1z"></path>
-                                    </svg>
-                                    Cetak
-                                </button>
-                            `}
-                            <button onclick="deleteBill(${bill.id})" class="text-red-600 hover:text-red-900 font-semibold transition-colors">Hapus</button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        async function deleteTenant(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus penghuni ini? Semua tagihan terkait juga akan dihapus.')) {
-                
-                try {
-                    await callApi({ action: 'deleteTenant', id: id });
-                    
-                    showNotification('Penghuni berhasil dihapus!', 'success');
-                    
-                    // Muat ulang semua data setelah berhasil
-                    await loadInitialData();
-                    
-                } catch (error) {
-                    // Notifikasi error sudah ditangani di callApi
-                }
-            }
-        }
-
-        async function deleteBill(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus tagihan ini?')) {
-                
-                try {
-                    await callApi({ action: 'deleteBill', id: id });
-                    
-                    showNotification('Tagihan berhasil dihapus!', 'success');
-                    
-                    // Muat ulang semua data setelah berhasil
-                    await loadInitialData();
-                    
-                } catch (error) {
-                    // Notifikasi error sudah ditangani di callApi
-                }
-            }
-        }
-
-        async function markAsPaid(id) {
-            const bill = bills.find(b => b.id === id);
-            if (!bill) return;
-            
-            const payload = {
-                action: 'updateBillStatus',
-                id: id,
-                status: 'paid',
-                paidDate: new Date().toISOString().split('T')[0],
-                paymentTime: new Date().toLocaleTimeString('id-ID'),
-            };
-            
-            try {
-                await callApi(payload);
-                
-                showNotification('Tagihan berhasil ditandai sebagai lunas!', 'success');
-                
-                // Muat ulang semua data setelah berhasil
-                await loadInitialData(); 
-                
-                // Automatically generate and print invoice
-                setTimeout(() => {
-                    generateInvoice(id);
-                }, 1000);
-            } catch (error) {
-                // Notifikasi error sudah ditangani di callApi
-            }
-        }
-
-        function viewKTP(tenantId) {
-            const tenant = tenants.find(t => t.id === tenantId);
-            if (!tenant || !tenant.ktpFile) {
-                showNotification('Dokumen KTP tidak ditemukan', 'error');
-                return;
-            }
-
-            // kptFile kini adalah JSON string, harus di parse
-            let ktpData;
-            try {
-                ktpData = JSON.parse(tenant.ktpFile);
-            } catch (e) {
-                ktpData = tenant.ktpFile; // Jika sudah terlanjur objek (untuk kompatibilitas)
-            }
-
-
-            const ktpContent = document.getElementById('ktpContent');
-            const downloadBtn = document.getElementById('downloadKtp');
-            
-            if (ktpData.type.startsWith('image/')) {
-                ktpContent.innerHTML = `
-                    <img src="${ktpData.data}" alt="KTP ${tenant.name}" class="max-w-full h-auto rounded-xl shadow-lg">
-                    <p class="text-sm text-gray-600 mt-4 font-medium">${ktpData.name} (${(ktpData.size / 1024).toFixed(1)} KB)</p>
-                `;
-            } else if (ktpData.type === 'application/pdf') {
-                ktpContent.innerHTML = `
-                    <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-12 rounded-xl">
-                        <svg class="w-20 h-20 text-red-500 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                        </svg>
-                        <p class="text-xl font-bold text-gray-900 mb-2">Dokumen PDF</p>
-                        <p class="text-sm text-gray-600 mb-2 font-medium">${ktpData.name}</p>
-                        <p class="text-sm text-gray-500 mb-4">${(ktpData.size / 1024).toFixed(1)} KB</p>
-                        <p class="text-xs text-gray-500">Klik tombol Download untuk melihat dokumen</p>
+        function renderActivities() {
+            const list = document.getElementById('recentActivities');
+            list.innerHTML = activities.slice(0, 8).map(a => `
+                <div class="flex gap-3 items-start text-sm border-b border-gray-50 pb-2 mb-2 last:border-0">
+                    <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1.5 shrink-0"></div>
+                    <div>
+                        <p class="text-gray-800">${a.message}</p>
+                        <p class="text-xs text-gray-400">${new Date(a.date).toLocaleString('id-ID')}</p>
                     </div>
-                `;
-            }
+                </div>
+            `).join('') || '<p class="text-gray-400 text-center py-4">Belum ada aktivitas.</p>';
+        }
 
-            downloadBtn.onclick = function() {
-                const link = document.createElement('a');
-                link.href = ktpData.data;
-                link.download = ktpData.name;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                showNotification('File berhasil diunduh!', 'success');
+        function updateSelect() {
+            const sel = document.getElementById('billTenant');
+            sel.innerHTML = '<option value="">Pilih Penghuni...</option>' + 
+                tenants.map(t => `<option value="${t.id}">${t.name} (${t.room})</option>`).join('');
+            sel.onchange = () => {
+                const t = tenants.find(x => x.id == sel.value);
+                if(t) document.getElementById('billAmount').value = t.monthlyRate;
             };
-
-            showModal(ktpModal);
         }
 
-        async function sendReminders() {
-            const pendingBills = bills.filter(b => b.status === 'pending');
-            if (pendingBills.length === 0) {
-                showNotification('Tidak ada tagihan yang perlu diingatkan', 'info');
-                return;
-            }
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchCloudData();
+            loadLogo();
+
+            // Tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.onclick = () => {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'border-indigo-600', 'text-indigo-600'));
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.add('border-transparent', 'text-gray-500'));
+                    btn.classList.add('active', 'border-indigo-600', 'text-indigo-600');
+                    btn.classList.remove('border-transparent', 'text-gray-500');
+                    
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                    document.getElementById(btn.dataset.tab + '-tab').classList.remove('hidden');
+                }
+            });
+
+            // Modals
+            const tModal = document.getElementById('tenantModal');
+            const bModal = document.getElementById('billModal');
             
-            // Simulate sending reminders
-            await addActivity(`Pengingat dikirim untuk ${pendingBills.length} tagihan (Simulasi)`);
-            showNotification(`Pengingat berhasil dikirim untuk ${pendingBills.length} tagihan! (Simulasi)`, 'success');
-        }
-
-        async function sendReminderToTenant(billId) {
-            const bill = bills.find(b => b.id === billId);
-            if (!bill) return;
+            document.getElementById('addTenantBtn').onclick = () => tModal.classList.replace('hidden', 'flex');
+            document.getElementById('quickAddTenant').onclick = () => tModal.classList.replace('hidden', 'flex');
+            document.getElementById('addBillBtn').onclick = () => bModal.classList.replace('hidden', 'flex');
+            document.getElementById('quickAddBill').onclick = () => bModal.classList.replace('hidden', 'flex');
             
-            // Simulate sending individual reminder
-            await addActivity(`Pengingat dikirim ke ${bill.tenantName} untuk tagihan Rp ${bill.amount.toLocaleString('id-ID')} (Simulasi)`);
-            showNotification(`Pengingat berhasil dikirim ke ${bill.tenantName}! (Simulasi)`, 'success');
-        }
+            document.getElementById('cancelTenant').onclick = () => tModal.classList.replace('flex', 'hidden');
+            document.getElementById('cancelBill').onclick = () => bModal.classList.replace('flex', 'hidden');
+            document.getElementById('closeKtpModal').onclick = () => document.getElementById('ktpModal').classList.replace('flex', 'hidden');
 
-        async function handleLogoUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+            // Search & Filter
+            document.getElementById('searchTenants').oninput = renderTenants;
+            document.getElementById('billFilter').onchange = renderBills;
+            document.getElementById('refreshDataBtn').onclick = fetchCloudData;
+            document.getElementById('exportData').onclick = () => {
+                 const d = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({tenants, bills, activities}));
+                 const a = document.createElement('a'); a.href = d; a.download = "kost_backup.json"; a.click();
+            };
+            document.getElementById('sendReminders').onclick = () => showNotif("Pengingat terkirim (Simulasi)", "info");
 
-            // 1. Validasi file
-            if (!file.type.startsWith('image/')) {
-                showNotification('Hanya file gambar yang diperbolehkan', 'error');
-                return;
-            }
-            if (file.size > 2 * 1024 * 1024) {
-                showNotification('Ukuran file terlalu besar. Maksimal 2MB.', 'error');
-                return;
-            }
-
-            // 2. Convert to base64 and save
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const logoData = {
-                    name: file.name,
-                    type: file.type,
-                    size: file.size,
-                    data: e.target.result // Base64 string
+            // Forms
+            document.getElementById('tenantForm').onsubmit = (e) => {
+                e.preventDefault();
+                const file = document.getElementById('ktpFile').files[0];
+                
+                const processSubmit = (kData) => {
+                    const newT = {
+                        id: Date.now(),
+                        name: document.getElementById('tenantName').value,
+                        room: document.getElementById('roomNumber').value,
+                        phone: document.getElementById('phoneNumber').value,
+                        monthlyRate: parseInt(document.getElementById('monthlyRate').value),
+                        joinDate: new Date().toISOString().split('T')[0],
+                        ktpFile: kData
+                    };
+                    tenants.push(newT);
+                    addAct(`Penghuni baru: ${newT.name}`);
+                    saveToCloud(); refreshUI();
+                    tModal.classList.replace('flex', 'hidden');
+                    e.target.reset();
                 };
 
-                try {
-                    await callApi({ action: 'uploadLogo', logoData: logoData });
-                    
-                    // 3. Display logo
-                    displayLogo(logoData);
-                    
-                    showNotification('Logo berhasil diupload!', 'success');
-                } catch (error) {
-                    // Notifikasi error sudah ditangani di callApi
-                }
+                if(file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => processSubmit({name: file.name, type: file.type, data: ev.target.result}); // Cloud only saves name usually, but base64 ok for small apps
+                    reader.readAsDataURL(file);
+                } else { processSubmit(null); }
             };
-            reader.readAsDataURL(file);
+
+            document.getElementById('billForm').onsubmit = (e) => {
+                e.preventDefault();
+                const tId = document.getElementById('billTenant').value;
+                const t = tenants.find(x => x.id == tId);
+                const newB = {
+                    id: Date.now(),
+                    tenantId: parseInt(tId),
+                    tenantName: t.name,
+                    room: t.room,
+                    amount: parseInt(document.getElementById('billAmount').value),
+                    dueDate: document.getElementById('dueDate').value,
+                    description: document.getElementById('billDescription').value || "Tagihan Kost",
+                    status: 'pending',
+                    createdDate: new Date().toISOString().split('T')[0]
+                };
+                bills.push(newB);
+                addAct(`Tagihan dibuat untuk ${t.name}`);
+                saveToCloud(); refreshUI();
+                bModal.classList.replace('flex', 'hidden');
+                e.target.reset();
+            };
+        });
+
+        // --- Actions ---
+        function deleteTenant(id) {
+            if(confirm("Hapus penghuni ini?")) {
+                tenants = tenants.filter(t => t.id !== id);
+                bills = bills.filter(b => b.tenantId !== id);
+                addAct("Penghuni dihapus");
+                saveToCloud(); refreshUI();
+            }
         }
-
-        function displayLogo(logoData) {
-            const logoImage = document.getElementById('logoImage');
-            const logoPlaceholder = document.getElementById('logoPlaceholder');
-            const removeLogo = document.getElementById('removeLogo');
-            const logoFrame = document.getElementById('logoFrame');
-
-            logoImage.src = logoData.data;
-            logoImage.classList.remove('hidden');
-            logoPlaceholder.classList.add('hidden');
-            removeLogo.classList.remove('hidden');
-            
-            // Update frame styling
-            logoFrame.classList.remove('border-dashed', 'border-gray-300');
-            logoFrame.classList.add('border-solid', 'border-indigo-300');
+        function deleteBill(id) {
+            if(confirm("Hapus tagihan ini?")) {
+                bills = bills.filter(b => b.id !== id);
+                addAct("Tagihan dihapus");
+                saveToCloud(); refreshUI();
+            }
         }
-
-        async function removeLogo() {
-            if (confirm('Apakah Anda yakin ingin menghapus logo?')) {
-                
-                try {
-                    // Kirim data kosong untuk menghapus logo dari Properties
-                    await callApi({ action: 'uploadLogo', logoData: null });
-                    
-                    const logoImage = document.getElementById('logoImage');
-                    const logoPlaceholder = document.getElementById('logoPlaceholder');
-                    const removeBtn = document.getElementById('removeLogo');
-                    const logoFrame = document.getElementById('logoFrame');
-                    const logoUpload = document.getElementById('logoUpload');
-
-                    // Hide logo and show placeholder
-                    logoImage.classList.add('hidden');
-                    logoPlaceholder.classList.remove('hidden');
-                    removeBtn.classList.add('hidden');
-                    
-                    // Reset frame styling
-                    logoFrame.classList.add('border-dashed', 'border-gray-300');
-                    logoFrame.classList.remove('border-solid', 'border-indigo-300');
-                    
-                    // Clear file input
-                    logoUpload.value = '';
-                    
-                    showNotification('Logo berhasil dihapus!', 'success');
-                    
-                    // Log activity
-                    await addActivity('Logo kost dihapus');
-                    
-                } catch (error) {
-                    // Notifikasi error sudah ditangani di callApi
+        function markAsPaid(id) {
+            const b = bills.find(x => x.id === id);
+            if(b) {
+                b.status = 'paid';
+                b.paidDate = new Date().toISOString().split('T')[0];
+                addAct(`Pembayaran diterima dari ${b.tenantName}`);
+                saveToCloud(); refreshUI();
+                setTimeout(() => generateInvoice(b), 500);
+            }
+        }
+        function addAct(msg) {
+            activities.unshift({ id: Date.now(), message: msg, date: new Date().toISOString() });
+        }
+        function viewKTP(id) {
+            const t = tenants.find(x => x.id === id);
+            const content = document.getElementById('ktpContent');
+            const modal = document.getElementById('ktpModal');
+            if(t && t.ktpFile) {
+                if(t.ktpFile.data) {
+                    content.innerHTML = `<img src="${t.ktpFile.data}" class="max-h-[60vh] rounded shadow">`;
+                } else {
+                    content.innerHTML = `<div class="p-8 text-center text-gray-500"><p class="font-bold mb-2">${t.ktpFile.name}</p><p class="text-xs">File fisik tersimpan di server.</p></div>`;
                 }
-            }
+                modal.classList.replace('hidden', 'flex');
+            } else { showNotif("Tidak ada KTP", "error"); }
         }
 
-        function printInvoice(billId) {
-            const bill = bills.find(b => b.id === billId);
-            if (!bill || bill.status !== 'paid') {
-                showNotification('Hanya tagihan yang sudah lunas yang bisa dicetak', 'error');
-                return;
-            }
-            generateInvoice(billId);
+        // --- Logo Handling ---
+        document.getElementById('logoUpload').onchange = (e) => {
+            const f = e.target.files[0];
+            if(f) { const r = new FileReader(); r.onload = (ev) => { localStorage.setItem('kostLogo', ev.target.result); loadLogo(); }; r.readAsDataURL(f); }
+        };
+        function loadLogo() {
+            const src = localStorage.getItem('kostLogo');
+            const img = document.getElementById('logoImage');
+            const ph = document.getElementById('logoPlaceholder');
+            if(src) { img.src = src; img.classList.remove('hidden'); ph.classList.add('hidden'); }
         }
 
-        function generateInvoice(billId) {
-            const bill = bills.find(b => b.id === billId);
-            const tenant = tenants.find(t => t.id === bill.tenantId);
-            if (!bill || !tenant) return;
+        // --- Invoice Printing (PAPUA THEME) ---
+        function printInvoice(id) {
+            const b = bills.find(x => x.id === id);
+            if(b) generateInvoice(b);
+        }
 
-            // Get logo data (from current display, which is loaded from API)
-            const logoImage = document.getElementById('logoImage');
-            const logoSrc = logoImage.classList.contains('hidden') ? '' : logoImage.src;
-            
-            // Generate invoice number
-            const invoiceNumber = `INV-${bill.id}-${new Date(bill.paidDate).getFullYear()}`;
-            
-            // Create invoice HTML with Papua theme
-            const invoiceHTML = `
-                <!DOCTYPE html>
-                <html lang="id">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Invoice Pembayaran - ${invoiceNumber}</title>
-                    <style>
-                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-                        
-                        * {
-                            margin: 0;
-                            padding: 0;
-                            box-sizing: border-box;
-                        }
-                        
-                        @page {
-                            size: A4;
-                            margin: 0;
-                        }
-                        
-                        body {
-                            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-                            background: #ffffff;
-                            color: #2d1b0e;
-                            line-height: 1.5;
-                            font-size: 14px;
-                            width: 210mm;
-                            height: 297mm;
-                            margin: 0 auto;
-                            position: relative;
-                        }
-                        
-                        .invoice-container {
-                            width: 100%;
-                            height: 100%;
-                            display: flex;
-                            flex-direction: column;
-                            background: linear-gradient(135deg, #fef7ed 0%, #ffffff 100%);
-                            position: relative;
-                        }
-                        
-                        .papua-pattern {
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            height: 120px;
-                            background: linear-gradient(45deg, 
-                                #dc2626 0%, #dc2626 10%, 
-                                #fbbf24 10%, #fbbf24 20%,
-                                #dc2626 20%, #dc2626 30%,
-                                #000000 30%, #000000 40%,
-                                #dc2626 40%, #dc2626 50%,
-                                #fbbf24 50%, #fbbf24 60%,
-                                #dc2626 60%, #dc2626 70%,
-                                #000000 70%, #000000 80%,
-                                #dc2626 80%, #dc2626 90%,
-                                #fbbf24 90%, #fbbf24 100%);
-                            background-size: 40px 40px;
-                            opacity: 0.1;
-                            z-index: 1;
-                        }
-                        
-                        .header {
-                            padding: 40px 50px 30px;
-                            background: linear-gradient(135deg, #7c2d12 0%, #a16207 50%, #dc2626 100%);
-                            color: white;
-                            position: relative;
-                            overflow: hidden;
-                            z-index: 2;
-                        }
-                        
-                        .header::before {
-                            content: '';
-                            position: absolute;
-                            top: -30px;
-                            right: -30px;
-                            width: 150px;
-                            height: 150px;
-                            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 10 L90 90 L10 90 Z" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="30" r="8" fill="rgba(255,255,255,0.15)"/><path d="M30 50 Q50 30 70 50 Q50 70 30 50" fill="rgba(255,255,255,0.1)"/></svg>') no-repeat center;
-                            background-size: contain;
-                        }
-                        
-                        .header::after {
-                            content: '';
-                            position: absolute;
-                            bottom: -20px;
-                            left: -20px;
-                            width: 100px;
-                            height: 100px;
-                            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M20 20 L80 20 L50 80 Z" fill="rgba(255,255,255,0.08)"/><circle cx="50" cy="35" r="5" fill="rgba(255,255,255,0.12)"/></svg>') no-repeat center;
-                            background-size: contain;
-                        }
-                        
-                        .header-content {
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: flex-start;
-                            position: relative;
-                            z-index: 3;
-                        }
-                        
-                        .company-section {
-                            display: flex;
-                            align-items: center;
-                            gap: 16px;
-                        }
-                        
-                        .logo {
-                            width: 60px;
-                            height: 60px;
-                            border-radius: 12px;
-                            object-fit: cover;
-                            border: 3px solid rgba(255,255,255,0.3);
-                            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-                        }
-                        
-                        .company-info h1 {
-                            font-size: 28px;
-                            font-weight: 700;
-                            letter-spacing: -0.5px;
-                            margin-bottom: 6px;
-                            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-                        }
-                        
-                        .company-info p {
-                            font-size: 14px;
-                            opacity: 0.9;
-                            font-weight: 400;
-                            font-style: italic;
-                        }
-                        
-                        .invoice-meta {
-                            text-align: right;
-                        }
-                        
-                        .invoice-title {
-                            font-size: 32px;
-                            font-weight: 300;
-                            letter-spacing: 3px;
-                            margin-bottom: 8px;
-                            text-transform: uppercase;
-                            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-                        }
-                        
-                        .invoice-number {
-                            font-size: 16px;
-                            font-weight: 600;
-                            opacity: 0.95;
-                            font-family: 'Courier New', monospace;
-                            background: rgba(255,255,255,0.2);
-                            padding: 6px 12px;
-                            border-radius: 6px;
-                            display: inline-block;
-                        }
-                        
-                        .content {
-                            flex: 1;
-                            padding: 40px 50px;
-                            display: flex;
-                            flex-direction: column;
-                            gap: 32px;
-                            position: relative;
-                            z-index: 2;
-                        }
-                        
-                        .info-grid {
-                            display: grid;
-                            grid-template-columns: 1fr 1fr;
-                            gap: 40px;
-                        }
-                        
-                        .info-card {
-                            background: white;
-                            border: 2px solid #fed7aa;
-                            border-radius: 16px;
-                            padding: 28px;
-                            box-shadow: 0 4px 12px rgba(194, 65, 12, 0.1);
-                            position: relative;
-                            overflow: hidden;
-                        }
-                        
-                        .info-card::before {
-                            content: '';
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            height: 4px;
-                            background: linear-gradient(90deg, #dc2626 0%, #fbbf24 50%, #dc2626 100%);
-                        }
-                        
-                        .info-card h3 {
-                            font-size: 13px;
-                            font-weight: 700;
-                            text-transform: uppercase;
-                            letter-spacing: 1.2px;
-                            color: #7c2d12;
-                            margin-bottom: 20px;
-                            border-bottom: 2px solid #fed7aa;
-                            padding-bottom: 10px;
-                            position: relative;
-                        }
-                        
-                        .info-card h3::after {
-                            content: '';
-                            position: absolute;
-                            bottom: -2px;
-                            left: 0;
-                            width: 30px;
-                            height: 2px;
-                            background: #dc2626;
-                        }
-                        
-                        .info-row {
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            margin-bottom: 14px;
-                            padding: 8px 0;
-                            border-bottom: 1px solid #fef3c7;
-                        }
-                        
-                        .info-row:last-child {
-                            margin-bottom: 0;
-                            border-bottom: none;
-                        }
-                        
-                        .info-label {
-                            font-size: 13px;
-                            color: #92400e;
-                            font-weight: 500;
-                        }
-                        
-                        .info-value {
-                            font-size: 14px;
-                            font-weight: 600;
-                            color: #7c2d12;
-                        }
-                        
-                        .status-paid {
-                            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-                            color: white;
-                            padding: 8px 16px;
-                            border-radius: 25px;
-                            font-size: 11px;
-                            font-weight: 700;
-                            text-transform: uppercase;
-                            letter-spacing: 0.8px;
-                            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
-                        }
-                        
-                        .payment-summary {
-                            background: white;
-                            border: 2px solid #fed7aa;
-                            border-radius: 16px;
-                            overflow: hidden;
-                            box-shadow: 0 6px 20px rgba(194, 65, 12, 0.15);
-                            position: relative;
-                        }
-                        
-                        .payment-summary::before {
-                            content: '';
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            height: 6px;
-                            background: linear-gradient(90deg, #dc2626 0%, #fbbf24 25%, #000000 50%, #fbbf24 75%, #dc2626 100%);
-                        }
-                        
-                        .summary-header {
-                            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
-                            padding: 24px 28px;
-                            border-bottom: 2px solid #fed7aa;
-                            position: relative;
-                        }
-                        
-                        .summary-header h3 {
-                            font-size: 18px;
-                            font-weight: 700;
-                            color: #7c2d12;
-                            text-transform: uppercase;
-                            letter-spacing: 1px;
-                        }
-                        
-                        .summary-body {
-                            padding: 28px;
-                        }
-                        
-                        .summary-row {
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            padding: 14px 0;
-                            border-bottom: 1px solid #fef3c7;
-                        }
-                        
-                        .summary-row:last-child {
-                            border-bottom: none;
-                            margin-top: 20px;
-                            padding: 24px 0 0;
-                            border-top: 3px solid #fed7aa;
-                            background: linear-gradient(135deg, #fef3c7 0%, transparent 100%);
-                            margin-left: -28px;
-                            margin-right: -28px;
-                            padding-left: 28px;
-                            padding-right: 28px;
-                        }
-                        
-                        .summary-label {
-                            font-size: 14px;
-                            color: #92400e;
-                            font-weight: 500;
-                        }
-                        
-                        .summary-value {
-                            font-size: 14px;
-                            font-weight: 600;
-                            color: #7c2d12;
-                        }
-                        
-                        .total-row .summary-label {
-                            font-size: 18px;
-                            font-weight: 700;
-                            color: #7c2d12;
-                            text-transform: uppercase;
-                            letter-spacing: 1px;
-                        }
-                        
-                        .total-row .summary-value {
-                            font-size: 24px;
-                            font-weight: 800;
-                            color: #dc2626;
-                            text-shadow: 1px 1px 2px rgba(220, 38, 38, 0.2);
-                        }
-                        
-                        .footer {
-                            margin-top: auto;
-                            padding: 35px 50px;
-                            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 50%, #fbbf24 100%);
-                            border-top: 3px solid #dc2626;
-                            text-align: center;
-                            position: relative;
-                            z-index: 2;
-                        }
-                        
-                        .footer::before {
-                            content: '';
-                            position: absolute;
-                            top: -3px;
-                            left: 0;
-                            right: 0;
-                            height: 3px;
-                            background: repeating-linear-gradient(90deg, #dc2626 0px, #dc2626 10px, #fbbf24 10px, #fbbf24 20px, #000000 20px, #000000 30px);
-                        }
-                        
-                        .thank-you {
-                            font-size: 20px;
-                            font-weight: 700;
-                            color: #7c2d12;
-                            margin-bottom: 14px;
-                            text-transform: uppercase;
-                            letter-spacing: 1px;
-                        }
-                        
-                        .footer-text {
-                            font-size: 12px;
-                            color: #92400e;
-                            line-height: 1.7;
-                            font-weight: 500;
-                        }
-                        
-                        .generated-date {
-                            margin-top: 12px;
-                            font-size: 11px;
-                            color: #a16207;
-                            font-family: 'Courier New', monospace;
-                            font-weight: 600;
-                        }
-                        
-                        .papua-ornament {
-                            position: absolute;
-                            bottom: 20px;
-                            right: 50px;
-                            width: 80px;
-                            height: 40px;
-                            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 50"><path d="M10 25 Q25 10 40 25 Q55 40 70 25 Q85 10 100 25" stroke="%23dc2626" stroke-width="2" fill="none"/><circle cx="25" cy="25" r="3" fill="%23fbbf24"/><circle cx="55" cy="25" r="3" fill="%23fbbf24"/><circle cx="85" cy="25" r="3" fill="%23fbbf24"/></svg>') no-repeat center;
-                            background-size: contain;
-                            opacity: 0.6;
-                        }
-                        
-                        @media print {
-                            body {
-                                -webkit-print-color-adjust: exact;
-                                print-color-adjust: exact;
-                            }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="invoice-container">
-                        <div class="papua-pattern"></div>
-                        
-                        <div class="header">
-                            <div class="header-content">
-                                <div class="company-section">
-                                    ${logoSrc ? `<img src="${logoSrc}" alt="Logo" class="logo">` : ''}
-                                    <div class="company-info">
-                                        <h1>Cenderawasih Kost</h1>
-                                        <p>Jl. Siwalan 1 No.5, RT.06/RW.03, Kel. Tlogosari Wetan<br>
-                                        Kec. Pedurungan, Kota Semarang - Provinsi Jawa Tengah<br>
-                                        📞 082227132306</p>
-                                    </div>
-                                </div>
-                                <div class="invoice-meta">
-                                    <div class="invoice-title">Invoice</div>
-                                    <div class="invoice-number">${invoiceNumber}</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="content">
-                            <div class="info-grid">
-                                <div class="info-card">
-                                    <h3>🏠 Informasi Penghuni</h3>
-                                    <div class="info-row">
-                                        <span class="info-label">Nama</span>
-                                        <span class="info-value">${tenant.name}</span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">Kamar</span>
-                                        <span class="info-value">${tenant.room}</span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">Telepon</span>
-                                        <span class="info-value">${tenant.phone}</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="info-card">
-                                    <h3>💰 Detail Pembayaran</h3>
-                                    <div class="info-row">
-                                        <span class="info-label">Tanggal Bayar</span>
-                                        <span class="info-value">${new Date(bill.paidDate).toLocaleDateString('id-ID', { 
-                                            day: 'numeric', 
-                                            month: 'short', 
-                                            year: 'numeric' 
-                                        })}</span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">Waktu</span>
-                                        <span class="info-value">${bill.paymentTime || new Date().toLocaleTimeString('id-ID', { 
-                                            hour: '2-digit', 
-                                            minute: '2-digit' 
-                                        })}</span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">Status</span>
-                                        <span class="status-paid">✓ Lunas</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="payment-summary">
-                                <div class="summary-header">
-                                    <h3>📋 Ringkasan Pembayaran</h3>
-                                </div>
-                                <div class="summary-body">
-                                    <div class="summary-row">
-                                        <span class="summary-label">Keterangan</span>
-                                        <span class="summary-value">${bill.description}</span>
-                                    </div>
-                                    <div class="summary-row">
-                                        <span class="summary-label">Periode</span>
-                                        <span class="summary-value">${new Date(bill.dueDate).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</span>
-                                    </div>
-                                    <div class="summary-row">
-                                        <span class="summary-label">Jatuh Tempo</span>
-                                        <span class="summary-value">${new Date(bill.dueDate).toLocaleDateString('id-ID', { 
-                                            day: 'numeric', 
-                                            month: 'short', 
-                                            year: 'numeric' 
-                                        })}</span>
-                                    </div>
-                                    <div class="summary-row total-row">
-                                        <span class="summary-label">Total Pembayaran</span>
-                                        <span class="summary-value">Rp ${bill.amount.toLocaleString('id-ID')}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="footer">
-                            <div class="thank-you">Terima Kasih Atas Pembayarannya</div>
-                            <div class="footer-text">
-                                Invoice ini dibuat secara otomatis dan merupakan bukti pembayaran resmi.<br>
-                                Simpan dokumen ini sebagai arsip Anda. 🙏
-                            </div>
-                            <div class="generated-date">Dibuat pada ${new Date().toLocaleString('id-ID')}</div>
-                            <div class="papua-ornament"></div>
-                        </div>
+        function generateInvoice(bill) {
+            const t = tenants.find(x => x.id === bill.tenantId);
+            const logoSrc = localStorage.getItem('kostLogo') || '';
+            const invNum = `INV-${bill.id}-${new Date().getFullYear()}`;
+
+            const win = window.open('', '_blank', 'width=800,height=600');
+            win.document.write(`
+                <html><head><title>Invoice ${invNum}</title>
+                <style>
+                    body { font-family: 'Helvetica', sans-serif; padding: 40px; color: #333; -webkit-print-color-adjust: exact; }
+                    .header { text-align: center; border-bottom: 4px solid #b91c1c; padding-bottom: 20px; margin-bottom: 30px; position: relative; }
+                    .header::after { content: ''; display: block; height: 4px; background: #fbbf24; margin-top: 4px; }
+                    .logo { max-height: 80px; margin-bottom: 10px; }
+                    h1 { color: #b91c1c; margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px; }
+                    .meta { display: flex; justify-content: space-between; margin-bottom: 30px; }
+                    .box { background: #fff7ed; border: 2px solid #fdba74; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+                    .total-box { background: #b91c1c; color: white; padding: 15px; border-radius: 8px; text-align: right; font-size: 20px; font-weight: bold; }
+                    .stamp { border: 3px solid #059669; color: #059669; display: inline-block; padding: 10px 30px; border-radius: 10px; font-weight: bold; font-size: 24px; transform: rotate(-10deg); float: right; opacity: 0.8; margin-top: -20px; }
+                    .ornament { height: 20px; background-image: repeating-linear-gradient(45deg, #b91c1c 0, #b91c1c 10px, #fbbf24 10px, #fbbf24 20px); margin-top: 40px; opacity: 0.5; }
+                </style>
+                </head><body>
+                    <div class="header">
+                        ${logoSrc ? `<img src="${logoSrc}" class="logo">` : ''}
+                        <h1>CENDERAWASIH KOST</h1>
+                        <p>Jl. Siwalan 1 No.5, Semarang | 082227132306</p>
                     </div>
-                </body>
-                </html>
-            `;
-
-            // Create new window and print
-            const printWindow = window.open('', '_blank', 'width=800,height=600');
-            printWindow.document.write(invoiceHTML);
-            printWindow.document.close();
-            
-            // Wait for content to load then print
-            printWindow.onload = function() {
-                setTimeout(async () => {
-                    printWindow.print();
-                    // Log activity setelah cetak
-                    await addActivity(`Invoice ${invoiceNumber} dicetak untuk ${tenant.name}`);
-                    showNotification('Invoice berhasil dicetak!', 'success');
-                }, 500);
-            };
+                    <div class="meta">
+                        <div><strong>Kepada Yth:</strong><br>${t ? t.name : bill.tenantName}<br>Kamar ${bill.room}</div>
+                        <div style="text-align:right"><strong>No. Invoice:</strong> ${invNum}<br><strong>Tanggal:</strong> ${bill.paidDate}</div>
+                    </div>
+                    <div class="box">
+                        <table width="100%">
+                            <tr><td style="padding: 10px 0; border-bottom: 1px dashed #ccc;"><strong>Deskripsi</strong></td><td align="right" style="border-bottom: 1px dashed #ccc;"><strong>Jumlah</strong></td></tr>
+                            <tr><td style="padding: 15px 0;">${bill.description}</td><td align="right">Rp ${bill.amount.toLocaleString('id-ID')}</td></tr>
+                        </table>
+                    </div>
+                    <div style="overflow: hidden; padding: 20px 0;">
+                        <div class="stamp">LUNAS</div>
+                        <div class="total-box">Total: Rp ${bill.amount.toLocaleString('id-ID')}</div>
+                    </div>
+                    <div style="text-align: center; color: #666; font-size: 12px; margin-top: 30px;">
+                        Terima kasih atas pembayaran Anda.<br>Bukti pembayaran ini sah dan diterbitkan secara otomatis.
+                    </div>
+                    <div class="ornament"></div>
+                </body></html>
+            `);
+            win.document.close();
+            win.focus();
+            setTimeout(() => win.print(), 800);
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98d2e5a446255fd8',t:'MTc2MDIzMzMwOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
